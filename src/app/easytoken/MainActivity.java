@@ -29,6 +29,8 @@ public class MainActivity extends Activity {
 
 	public static final String TAG = "EasyToken";
 
+	private Fragment mFrag;
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -36,21 +38,32 @@ public class MainActivity extends Activity {
 		Log.i(TAG, "MainActivity: onResume()");
 
 		TokenInfo info = TokenInfo.getDefaultToken();
-		Fragment f;
 
 		if (info != null) {
-			f = new TokencodeFragment();
+			mFrag = new TokencodeFragment();
 			Bundle b = new Bundle();
 			b.putInt(TokencodeFragment.EXTRA_ID, info.id);
-			f.setArguments(b);
+			mFrag.setArguments(b);
 		} else {
-			f = new GettingStartedFragment();
+			mFrag = new GettingStartedFragment();
 		}
 
 		getFragmentManager().beginTransaction()
-			.replace(android.R.id.content, f)
+			.replace(android.R.id.content, mFrag)
 			.commit();
 	}
+
+	@Override
+	protected void onPause() {
+		if (mFrag != null) {
+			getFragmentManager().beginTransaction()
+				.remove(mFrag)
+				.commit();
+			mFrag = null;
+		}
+		super.onPause();
+	}
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
