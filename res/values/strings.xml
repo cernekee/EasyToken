@@ -5,4 +5,35 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
 
+    <string name="get_started_text">To get started, please choose one of the following options:</string>
+    <string name="import_token">Import token</string>
+    <string name="import_new_token">Import new token</string>
+    <string name="help">Help</string>
+    <string name="about">About</string>
+
+    <string name="device_id">Device ID:</string>
+    <string name="copy">Copy</string>
+    <string name="email">Email</string>
+    <string name="copied_entry">Copied to clipboard.</string>
+
+    <string name="next_tokencode">Next tokencode:</string>
+    <string name="using_pin">Using PIN:</string>
+    <string name="token_sn">Token S/N:</string>
+    <string name="exp_date">Expiration date:</string>
+    <string name="gmt">Current time (GMT):</string>
+    <string name="dev_id">SecurID device ID:</string>
+    <string name="enter_pin">Enter PIN:</string>
+    <string name="new_pin">New PIN</string>
+    <string name="skip">Skip</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="next">Next</string>
+    <string name="finish">Finish</string>
+
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="not_required">Not required</string>
+    <string name="unknown">Unknown</string>
+
 </resources>
