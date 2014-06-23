@@ -149,11 +149,18 @@ public class TokenInfo {
 	}
 
 	public void delete() {
-		int newMax;
+		int newMax, newDefault = -1;
 
 		for (newMax = mMaxId; newMax >= 0; newMax--) {
 			if (newMax != id && getTokenString(newMax) != null)
 				break;
+		}
+
+		for (int i = 0; i <= newMax; i++) {
+			if (getTokenString(i) != null) {
+				newDefault = i;
+				break;
+			}
 		}
 
 		mPrefs.edit()
@@ -161,8 +168,11 @@ public class TokenInfo {
 			.remove("token_pin_" + id)
 			.remove("token_name_" + id)
 			.putInt("max_id", newMax)
+			.putInt("default_id", newDefault)
 			.commit();
+
 		mMaxId = newMax;
+		mDefaultId = newDefault;
 	}
 
 	public int save() {
