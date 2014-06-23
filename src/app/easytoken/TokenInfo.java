@@ -47,9 +47,17 @@ public class TokenInfo {
 		mMaxId = mPrefs.getInt("max_id", 0);
 		mDefaultId = mPrefs.getInt("default_id", -1);
 
-		/* ANDROID_ID is unique, but it is only 64 bits long.  So truncate its SHA1 hash to 12 bytes. */
-		String id = sha1(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
-		mDeviceId = id.substring(0, 24);
+		/*
+		 * ANDROID_ID is unique, but it is only 64 bits long.  So truncate its SHA1 hash to 12 bytes.
+		 * Also, store it in mPrefs in case the ROM provides a random value on each access/boot/whatever.
+		 * Because we don't want to get a bound token issued for a random device ID.
+		 */
+		mDeviceId = mPrefs.getString("device_id", null);
+		if (mDeviceId == null) {
+			String id = sha1(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
+			mDeviceId = id.substring(0, 24);
+			mPrefs.edit().putString("device_id", mDeviceId).commit();
+		}
 	}
 
 	private static String sha1(String input) {
