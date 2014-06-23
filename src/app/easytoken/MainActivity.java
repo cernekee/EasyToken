@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -34,8 +33,6 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		Log.i(TAG, "MainActivity: onResume()");
 
 		TokenInfo info = TokenInfo.getDefaultToken();
 
