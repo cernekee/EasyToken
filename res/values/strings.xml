@@ -36,4 +36,12 @@
     <string name="not_required">Not required</string>
     <string name="unknown">Unknown</string>
 
+    <string name="select_token_source">Please select a token source:</string>
+
+    <string name="import_uri_help">To import an \"sdtid\" XML file that is attached to an email, click on the attachment and select \"Import token\".  If that doesn\'t work, you can copy it to external storage via USB and then directly import the file.\n\nTo import a link in any of these formats, click on the blue underlined link from your email client and then select \"Import token\":</string>
+    <string name="import_uri_examples" translatable="false">http://127.0.0.1/securid/ctf?ctfData=25049...\nhttp://127.0.0.1/securid/ctf?ctfData=AwAAf...\ncom.rsa.securid.iphone://ctf?ctfData=22963...</string>
+
+    <string name="qr_prompt_title">Install Barcode Scanner?</string>
+    <string name="qr_prompt_message">Importing a QR code requires Barcode Scanner, a free app. Would you like to install it?</string>
+
 </resources>
