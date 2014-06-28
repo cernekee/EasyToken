@@ -35,7 +35,8 @@ import com.google.zxing.integration.android.IntentResult;
 import de.blinkt.openvpn.FileSelect;
 
 public class ImportActivity extends Activity
-		implements ImportMethodFragment.OnImportMethodSelectedListener {
+		implements ImportMethodFragment.OnImportMethodSelectedListener,
+		           ImportManualEntryFragment.OnManualEntryDoneListener {
 
 	public static final String TAG = "EasyToken";
 
@@ -45,6 +46,7 @@ public class ImportActivity extends Activity
 	private static final int STEP_METHOD = 1;
 	private static final int STEP_URI_INSTRUCTIONS = 2;
 	private static final int STEP_IMPORT_TOKEN = 3;
+	private static final int STEP_MANUAL_ENTRY = 4;
 
 	private static final int REQ_SCAN_QR = IntentIntegrator.REQUEST_CODE;
 	private static final int REQ_PICK_FILE = REQ_SCAN_QR + 1;
@@ -127,6 +129,8 @@ public class ImportActivity extends Activity
 			f = new ImportInstructionsFragment();
 			f.setArguments(b);
 			showFrag(f, animate);
+		} else if (mStep == STEP_MANUAL_ENTRY) {
+			showFrag(new ImportManualEntryFragment(), animate);
 		} else if (mStep == STEP_IMPORT_TOKEN) {
 			// FIXME: parse URI and figure out what to do next
 			android.util.Log.d(TAG, "XXX importing URI " + mUri);
@@ -135,9 +139,10 @@ public class ImportActivity extends Activity
 
 	@Override
 	public void onImportMethodSelected(String method) {
+		mInputMethod = method;
+
 		if (method.equals("uri")) {
 			mStep = STEP_URI_INSTRUCTIONS;
-			mInputMethod = method;
 			handleImportStep();
 		} else if (method.equals("qr")) {
 			ArrayList<String> formats = new ArrayList<String>();
@@ -155,6 +160,9 @@ public class ImportActivity extends Activity
 			i.putExtra(FileSelect.START_DATA, Environment.getExternalStorageDirectory().getPath());
 			i.putExtra(FileSelect.NO_INLINE_SELECTION, true);
 			startActivityForResult(i, REQ_PICK_FILE);
+		} else if (method.equals("manual")) {
+			mStep = STEP_MANUAL_ENTRY;
+			handleImportStep();
 		}
 	}
 
@@ -162,6 +170,11 @@ public class ImportActivity extends Activity
 		mStep = STEP_IMPORT_TOKEN;
 		mUri = s;
 		handleImportStep();
+	}
+
+	@Override
+	public void onManualEntryDone(String token) {
+		tryImport(token);
 	}
 
 	@Override

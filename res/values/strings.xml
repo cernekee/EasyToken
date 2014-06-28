@@ -39,7 +39,12 @@
     <string name="select_token_source">Please select a token source:</string>
 
     <string name="import_uri_help">To import an \"sdtid\" XML file that is attached to an email, click on the attachment and select \"Import token\".  If that doesn\'t work, you can copy it to external storage via USB and then directly import the file.\n\nTo import a link in any of these formats, click on the blue underlined link from your email client and then select \"Import token\":</string>
-    <string name="import_uri_examples" translatable="false">http://127.0.0.1/securid/ctf?ctfData=25049...\nhttp://127.0.0.1/securid/ctf?ctfData=AwAAf...\ncom.rsa.securid.iphone://ctf?ctfData=22963...</string>
+    <string name="import_uri_examples" translatable="false">http://127.0.0.1/securid/ctf?ctfData=25049&#8230;\nhttp://127.0.0.1/securid/ctf?ctfData=AwAAf&#8230;\ncom.rsa.securid.iphone://ctf?ctfData=22963&#8230;</string>
+
+    <string name="manual_prompt">Enter your token string here:</string>
+    <string name="examples">Examples:</string>
+    <string name="manual_examples" translatable="false">29624-04141-91521-01027-05321-47115-52307-&#8230;\n2806706667477513430277017220171264075514&#8230;</string>
+    <string name="manual_help">The \"Next\" button will become active once a valid token string is entered.</string>
 
     <string name="qr_prompt_title">Install Barcode Scanner?</string>
     <string name="qr_prompt_message">Importing a QR code requires Barcode Scanner, a free app. Would you like to install it?</string>
