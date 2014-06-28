@@ -17,6 +17,7 @@
 
 package app.easytoken;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -26,9 +27,12 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import de.blinkt.openvpn.FileSelect;
 
 public class ImportActivity extends Activity
 		implements ImportMethodFragment.OnImportMethodSelectedListener {
@@ -41,6 +45,9 @@ public class ImportActivity extends Activity
 	private static final int STEP_METHOD = 1;
 	private static final int STEP_URI_INSTRUCTIONS = 2;
 	private static final int STEP_IMPORT_TOKEN = 3;
+
+	private static final int REQ_SCAN_QR = IntentIntegrator.REQUEST_CODE;
+	private static final int REQ_PICK_FILE = REQ_SCAN_QR + 1;
 
 	private AlertDialog mDialog;
 
@@ -122,6 +129,7 @@ public class ImportActivity extends Activity
 			showFrag(f, animate);
 		} else if (mStep == STEP_IMPORT_TOKEN) {
 			// FIXME: parse URI and figure out what to do next
+			android.util.Log.d(TAG, "XXX importing URI " + mUri);
 		}
 	}
 
@@ -142,16 +150,34 @@ public class ImportActivity extends Activity
 			ii.setButtonNoByID(R.string.no);
 
 			mDialog = ii.initiateScan(formats);
+		} else if (method.equals("browse")) {
+			Intent i = new Intent(this, FileSelect.class);
+			i.putExtra(FileSelect.START_DATA, Environment.getExternalStorageDirectory().getPath());
+			i.putExtra(FileSelect.NO_INLINE_SELECTION, true);
+			startActivityForResult(i, REQ_PICK_FILE);
 		}
+	}
+
+	private void tryImport(String s) {
+		mStep = STEP_IMPORT_TOKEN;
+		mUri = s;
+		handleImportStep();
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-		if (scanResult != null) {
-			mStep = STEP_IMPORT_TOKEN;
-			mUri = scanResult.getContents();
-			handleImportStep();
+		super.onActivityResult(requestCode, resultCode, intent);
+
+		if (requestCode == REQ_SCAN_QR) {
+			IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+			if (scanResult != null) {
+				tryImport(scanResult.getContents());
+			}
+		} else if (requestCode == REQ_PICK_FILE) {
+			if (resultCode == Activity.RESULT_OK) {
+				String path = intent.getStringExtra(FileSelect.RESULT_DATA);
+				tryImport(Uri.fromFile(new File(path)).toString());
+			}
 		}
 	}
 }
