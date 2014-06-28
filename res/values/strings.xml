@@ -44,4 +44,18 @@
     <string name="qr_prompt_title">Install Barcode Scanner?</string>
     <string name="qr_prompt_message">Importing a QR code requires Barcode Scanner, a free app. Would you like to install it?</string>
 
+    <!-- FileDialog -->
+    <string name="clear">Clear</string>
+    <string name="no_data">No Data</string>
+    <string name="make_selection_inline">Copy into profile</string>
+    <string name="select_file">Select</string>
+    <string name="file_icon">file icon</string>
+    <string name="location">Location</string>
+    <string name="cant_read_folder">Unable to read directory</string>
+    <string name="file_explorer_tab">File Explorer</string>
+    <string name="inline_file_tab">Inline File</string>
+    <string name="file_too_large">File is too large</string>
+    <string name="error_importing_file">Error importing File</string>
+    <string name="import_error_message">Could not import File from filesystem</string>
+
 </resources>
