@@ -85,7 +85,7 @@
 		android:layout_height="1dp"
 		android:background="@android:color/darker_gray"/>
 
-	<!-- row 4: token S/N, exp date -->
+	<!-- row 4: token S/N, GMT -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -103,7 +103,7 @@
             android:layout_weight="1" />
 
         <TextView
-            android:id="@+id/exp_date"
+            android:id="@+id/gmt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right" />
@@ -115,14 +115,14 @@
 		android:layout_height="1dp"
 		android:background="@android:color/darker_gray"/>
 
-	<!-- row 5: GMT, device ID -->
+	<!-- row 5: expiration date, device ID -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
         <TextView
-            android:id="@+id/gmt"
+            android:id="@+id/exp_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="left" />
