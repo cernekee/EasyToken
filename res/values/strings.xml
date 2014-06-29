@@ -53,6 +53,17 @@
     <string name="qr_prompt_title">Install Barcode Scanner?</string>
     <string name="qr_prompt_message">Importing a QR code requires Barcode Scanner, a free app. Would you like to install it?</string>
 
+    <string name="pass_prompt">Enter the password for this token:</string>
+    <string name="devid_prompt">Enter the bound device ID:</string>
+    <string name="pin_prompt">Enter PIN (optional):</string>
+
+    <string name="unable_to_process_token">Unable to process token</string>
+    <string name="pass_bad">The supplied password is incorrect.</string>
+    <string name="devid_bad">The supplied device ID is incorrect.</string>
+    <string name="pass_devid_bad">The supplied password or bound device ID is incorrect.</string>
+    <string name="general_failure">General failure.</string>
+    <string name="pin_bad">PIN must be 4-8 digits long.</string>
+
     <!-- FileDialog -->
     <string name="clear">Clear</string>
     <string name="no_data">No Data</string>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+	<ScrollView
+	    android:layout_weight="1"
+	    android:layout_width="match_parent"
+	    android:layout_height="0dp" >
+
+		<LinearLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical" >
+    
+			<TextView
+			    android:id="@+id/pass_label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_margin="20dp"
+				android:text="@string/pass_prompt"
+				android:textAppearance="?android:attr/textAppearanceMedium" />
+	
+			<EditText
+			    android:id="@+id/pass_entry"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_marginLeft="20dp"
+			    android:layout_marginRight="20dp"
+			    android:inputType="textPassword"
+			    android:ems="10" />
+	
+			<TextView
+			    android:id="@+id/devid_label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_margin="20dp"
+				android:text="@string/devid_prompt"
+				android:textAppearance="?android:attr/textAppearanceMedium" />
+	
+			<EditText
+			    android:id="@+id/devid_entry"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_marginLeft="20dp"
+			    android:layout_marginRight="20dp"
+			    android:inputType="textNoSuggestions"
+			    android:ems="10" />
+	
+			<TextView
+			    android:id="@+id/pin_label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_margin="20dp"
+				android:text="@string/pin_prompt"
+				android:textAppearance="?android:attr/textAppearanceMedium" />
+	
+			<EditText
+			    android:id="@+id/pin_entry"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_marginLeft="20dp"
+			    android:layout_marginRight="20dp"
+			    android:inputType="numberPassword"
+			    android:ems="10" />
+		</LinearLayout>
+	</ScrollView>
+
+    <Button
+        android:layout_marginTop="10dp"
+        android:id="@+id/next_button"
+        android:layout_gravity="right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/next" />
+	
+</LinearLayout>
