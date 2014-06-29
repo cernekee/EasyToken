@@ -31,13 +31,13 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.Html;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,47 +47,23 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class TokencodeFragment extends Fragment {
+public class TokencodeFragment extends Fragment
+		implements TokencodeBackend.OnTokencodeUpdateListener {
 	public static final String TAG = "EasyToken";
 
 	private static final String PFX = "app.easytoken.";
 	public static final String EXTRA_ID = PFX + "ID";
 
-	private TokenInfo mTok;
-	private LibStoken mStoken;
 	private TextView mTokencode;
 	private String mRawTokencode = "";
 	private ProgressBar mProgressBar;
 	private View mView;
-	private Calendar mLastUpdate;
 
 	private String mPin;
-	private boolean mPinPrompt = false;
 	private boolean mNeedsPin = false;
 	private AlertDialog mDialog;
 
-	private Handler mHandler;
-	private Runnable mRunnable;
-
-	@Override
-	public void setArguments(Bundle b) {
-		mTok = TokenInfo.getToken(b.getInt(EXTRA_ID));
-		mStoken = mTok.lib;
-		mPinPrompt = mNeedsPin = mStoken.isPINRequired();
-	}
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-	    super.onCreate(savedInstanceState);
-        mHandler = new Handler();
-
-        mRunnable = new Runnable() {
-			@Override
-			public void run() {
-				updateUI();
-			}
-        };
-	}
+	private TokencodeBackend mBackend;
 
     private void writeStatusField(int id, int header_res, String value, boolean warn) {
     	String html = "<b>" + TextUtils.htmlEncode(getString(header_res)) + "</b><br>";
@@ -136,9 +112,10 @@ public class TokencodeFragment extends Fragment {
 		});
 
 		/* static fields */
-		LibStoken.StokenInfo info = mStoken.getInfo();
+		LibStoken.StokenInfo info = mBackend.info.lib.getInfo();
 
 		writeStatusField(R.id.token_sn, R.string.token_sn, info.serial);
+		mProgressBar.setMax(info.interval - 1);
 
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
 		long exp = info.unixExpDate * 1000;
@@ -156,54 +133,24 @@ public class TokencodeFragment extends Fragment {
 
     	View v;
 
+    	mBackend = new TokencodeBackend();
+    	if (mBackend.init(getActivity(), this, getArguments().getInt(EXTRA_ID)) != true) {
+    		Log.e(TAG, "Error initializing TokencodeFragment");
+    	}
+
+		// XXX set mPin = "" if PIN is not needed
+		mPin = "0000";
+
 		v = inflater.inflate(R.layout.token_diag_info, container, false);
 		populateView(v);
-		setPin(mPin);
 
     	return v;
     }
 
-    private String formatTokencode(String s) {
-    	int midpoint = s.length() / 2;
-    	return s.substring(0, midpoint) + " " + s.substring(midpoint);
-    }
-
-    private void updateUI() {
-    	/* in this case we're just displaying a static error message */
-    	if (mTokencode == null) {
-    		return;
-    	}
-
-    	/* don't update if the PIN dialog is up */
-    	if (mDialog != null) {
-    		mHandler.postDelayed(mRunnable, 500);
-    		return;
-    	}
-
-    	Calendar now = Calendar.getInstance();
-    	mProgressBar.setProgress(59 - now.get(Calendar.SECOND));
-
-    	if (mLastUpdate == null ||
-    		now.get(Calendar.MINUTE) != mLastUpdate.get(Calendar.MINUTE)) {
-
-			// if the library already stored a PIN, it is necessary to pass
-			// in "0000" (to overwrite) instead of null (to keep the existing PIN)
-    		String pin = mPin == null ? "0000" : mPin;
-
-    		long t = now.getTimeInMillis() / 1000;
-    		mRawTokencode = mStoken.computeTokencode(t, pin);
-    		mTokencode.setText(formatTokencode(mRawTokencode));
-    		writeStatusField(R.id.next_tokencode, R.string.next_tokencode,
-    				formatTokencode(mStoken.computeTokencode(t + 60, pin)));
-    	}
-
-		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG);
-		df.setTimeZone(TimeZone.getTimeZone("GMT"));
-		String gmt = df.format(now.getTime()).replaceAll(" GMT.*", "");
-		writeStatusField(R.id.gmt, R.string.gmt, gmt);
-
-    	mLastUpdate = now;
-    	mHandler.postDelayed(mRunnable, 500);
+    @Override
+	public void onDestroy() {
+    	mBackend.destroy();
+    	super.onDestroy();
     }
 
     private void setPin(String s) {
@@ -213,7 +160,7 @@ public class TokencodeFragment extends Fragment {
     	mPin = s;
 		if (!mNeedsPin) {
 			res = R.string.not_required;
-		} else if (s == null || !mStoken.checkPIN(s)) {
+		} else if (s == null) {
 			mPin = null;
 			warn = true;
 			res = R.string.no;
@@ -222,8 +169,6 @@ public class TokencodeFragment extends Fragment {
 		}
 
 		writeStatusField(R.id.using_pin, R.string.using_pin, getString(res), warn);
-		//FragCache.put(mUUID, EXTRA_PIN, mPin);
-		mLastUpdate = null;
     }
 
     private void pinDialog() {
@@ -258,7 +203,8 @@ public class TokencodeFragment extends Fragment {
     	mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
-				mPinPrompt = false;
+				// XXX
+				mPin = "";
 				mDialog = null;
 			}
     	});
@@ -272,7 +218,7 @@ public class TokencodeFragment extends Fragment {
 			@Override
 			public void afterTextChanged(Editable arg0) {
 				String s = tv.getText().toString();
-				okButton.setEnabled(mStoken.checkPIN(s));
+				okButton.setEnabled(mBackend.info.lib.checkPIN(s));
 			}
 
 			@Override
@@ -288,18 +234,18 @@ public class TokencodeFragment extends Fragment {
     @Override
     public void onResume() {
     	super.onResume();
-    	mLastUpdate = null;
-    	mHandler.post(mRunnable);
+    	mBackend.onResume();
 
-    	if (mPinPrompt) {
-    		pinDialog();
+    	if (mPin == null) {
+    		android.util.Log.d(TAG, "XXX show PIN dialog");
+    		// mDialog = pinDialog();
     	}
     }
 
     @Override
     public void onPause() {
+    	mBackend.onPause();
     	super.onPause();
-    	mHandler.removeCallbacks(mRunnable);
 
     	if (mDialog != null) {
     		mDialog.dismiss();
@@ -307,4 +253,18 @@ public class TokencodeFragment extends Fragment {
     	}
     }
 
+	@Override
+	public void onTokencodeUpdate(String tokencode, String nextTokencode, int secondsLeft) {
+		mProgressBar.setProgress(secondsLeft - 1);
+		mRawTokencode = tokencode;
+		mTokencode.setText(TokencodeBackend.formatTokencode(mRawTokencode));
+		writeStatusField(R.id.next_tokencode, R.string.next_tokencode,
+				TokencodeBackend.formatTokencode(nextTokencode));
+
+		Calendar now = Calendar.getInstance();
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG);
+		df.setTimeZone(TimeZone.getTimeZone("GMT"));
+		String gmt = df.format(now.getTime()).replaceAll(" GMT.*", "");
+		writeStatusField(R.id.gmt, R.string.gmt, gmt);
+	}
 }
