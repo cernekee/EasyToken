@@ -67,18 +67,12 @@ public class ImportActivity extends Activity
 	private String mUri;
 	private String mErrorType;
 	private String mErrorData;
-	private String mPass;
-	private String mDevid;
-	private String mPin;
 
 	private static final String STATE_STEP = PFX + "step";
 	private static final String STATE_INPUT_METHOD = PFX + "input_method";
 	private static final String STATE_URI = PFX + "uri";
 	private static final String STATE_ERROR_TYPE = PFX + "error_type";
 	private static final String STATE_ERROR_DATA = PFX + "error_data";
-	private static final String STATE_PASS = PFX + "pass";
-	private static final String STATE_DEVID = PFX + "devid";
-	private static final String STATE_PIN = PFX + "pin";
 
 	@Override
 	public void onCreate(Bundle b) {
@@ -90,9 +84,6 @@ public class ImportActivity extends Activity
 			mUri = b.getString(STATE_URI);
 			mErrorType = b.getString(STATE_ERROR_TYPE);
 			mErrorData = b.getString(STATE_ERROR_DATA);
-			mPass = b.getString(STATE_PASS);
-			mDevid = b.getString(STATE_DEVID);
-			mPin = b.getString(STATE_PIN);
 		} else {
 			Intent i = this.getIntent();
 			if (i != null) {
@@ -123,9 +114,6 @@ public class ImportActivity extends Activity
 		b.putString(STATE_URI, mUri);
 		b.putString(STATE_ERROR_TYPE, mErrorType);
 		b.putString(STATE_ERROR_DATA, mErrorData);
-		b.putString(STATE_PASS, mPass);
-		b.putString(STATE_DEVID, mDevid);
-		b.putString(STATE_PIN, mPin);
 	}
 
 	private void showFrag(Fragment f, boolean animate) {
@@ -138,7 +126,14 @@ public class ImportActivity extends Activity
 		ft.replace(android.R.id.content, f).commit();
 	}
 
-	private LibStoken importToken(String data) {
+	private void showError(String errCode, String errData) {
+		mStep = STEP_ERROR;
+		mErrorType = errCode;
+		mErrorData = errData;
+		handleImportStep();
+	}
+
+	private LibStoken importToken(String data, boolean decrypt) {
 		Uri uri = Uri.parse(data);
 		String path = uri.getPath();
 		boolean isFile = false;
@@ -152,20 +147,15 @@ public class ImportActivity extends Activity
 			isFile = true;
 			data = Misc.readStringFromFile(path);
 			if (data == null) {
-				mStep = STEP_ERROR;
-				mErrorType = ImportInstructionsFragment.INST_FILE_ERROR;
-				mErrorData = path;
-				handleImportStep();
+				showError(ImportInstructionsFragment.INST_FILE_ERROR, path);
 				return null;
 			}
 		}
 
 		LibStoken lib = new LibStoken();
-		if (lib.importString(data) != LibStoken.SUCCESS) {
-			mStep = STEP_ERROR;
-			mErrorType = ImportInstructionsFragment.INST_BAD_TOKEN;
-			mErrorData = isFile ? "" : data;
-			handleImportStep();
+		if (lib.importString(data) != LibStoken.SUCCESS ||
+				(decrypt && lib.decryptSeed(null, null) != LibStoken.SUCCESS)) {
+			showError(ImportInstructionsFragment.INST_BAD_TOKEN, isFile ? "" : data);
 			lib.destroy();
 			return null;
 		}
@@ -173,24 +163,19 @@ public class ImportActivity extends Activity
 		return lib;
 	}
 
-	private boolean finishImport(LibStoken lib, String pin) {
+	private void finishImport(LibStoken lib) {
 		TokenInfo info;
-
-		if (lib.decryptSeed(mPass, mDevid) != LibStoken.SUCCESS) {
-			mStep = STEP_ERROR;
-			mErrorType = ImportInstructionsFragment.INST_BAD_TOKEN;
-			mErrorData = mUri;
-			return false;
-		}
 
 		info = TokenInfo.getDefaultToken();
 		if (info != null) {
 			info.delete();
 		}
 
-		info = new TokenInfo(lib, pin);
+		info = new TokenInfo(lib, null);
 		info.save();
-		return true;
+
+		mStep = STEP_DONE;
+		finish();
 	}
 
 	private void unlockDone(LibStoken lib) {
@@ -198,10 +183,7 @@ public class ImportActivity extends Activity
 			mStep = STEP_CONFIRM_OVERWRITE;
 			handleImportStep();
 		} else {
-			if (finishImport(lib, mPin)) {
-				mStep = STEP_DONE;
-				finish();
-			}
+			finishImport(lib);
 		}
 	}
 
@@ -228,7 +210,7 @@ public class ImportActivity extends Activity
 		} else if (mStep == STEP_MANUAL_ENTRY) {
 			showFrag(new ImportManualEntryFragment(), animate);
 		} else if (mStep == STEP_IMPORT_TOKEN) {
-			LibStoken lib = importToken(mUri);
+			LibStoken lib = importToken(mUri, false);
 			if (lib == null) {
 				/* mStep has already been advanced to an error state */
 				return;
@@ -236,6 +218,10 @@ public class ImportActivity extends Activity
 			if (lib.isDevIDRequired() || lib.isPassRequired()) {
 				mStep = STEP_UNLOCK_TOKEN;
 			} else {
+				if (lib.decryptSeed(null, null) != LibStoken.SUCCESS) {
+					showError(ImportInstructionsFragment.INST_BAD_TOKEN, mUri);
+					return;
+				}
 				unlockDone(lib);
 			}
 			lib.destroy();
@@ -249,7 +235,7 @@ public class ImportActivity extends Activity
 			f.setArguments(b);
 			showFrag(f, animate);
 		} else if (mStep == STEP_UNLOCK_TOKEN) {
-			LibStoken lib = importToken(mUri);
+			LibStoken lib = importToken(mUri, false);
 			if (lib == null) {
 				/* mStep has already been advanced to an error state */
 				return;
@@ -272,7 +258,7 @@ public class ImportActivity extends Activity
 
 			lib.destroy();
 		} else if (mStep == STEP_CONFIRM_OVERWRITE) {
-			LibStoken lib = importToken(mUri);
+			LibStoken lib = importToken(mUri, true);
 			if (lib == null) {
 				/* mStep has already been advanced to an error state */
 				return;
@@ -361,7 +347,7 @@ public class ImportActivity extends Activity
 
 	@Override
 	public void onUnlockDone(String pass, String devid, String pin) {
-		LibStoken lib = importToken(mUri);
+		LibStoken lib = importToken(mUri, false);
 		if (lib == null) {
 			/* mStep has already been advanced to an error state */
 			return;
@@ -382,9 +368,7 @@ public class ImportActivity extends Activity
 			return;
 		}
 
-		mPass = pass;
-		mDevid = devid;
-
+		mUri = lib.encryptSeed(null, null);
 		unlockDone(lib);
 		lib.destroy();
 	}
@@ -397,12 +381,11 @@ public class ImportActivity extends Activity
 			return;
 		}
 
-		LibStoken lib = importToken(mUri);
+		LibStoken lib = importToken(mUri, true);
 		if (lib == null) {
 			/* mStep has already been advanced to an error state */
 			return;
 		}
-		finishImport(lib, mPin);
-		finish();
+		finishImport(lib);
 	}
 }
