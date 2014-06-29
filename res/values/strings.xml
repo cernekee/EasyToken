@@ -64,6 +64,10 @@
     <string name="general_failure">General failure.</string>
     <string name="pin_bad">PIN must be 4-8 digits long.</string>
 
+    <string name="overwrite_confirm">Are you sure you want to overwrite your current token?</string>
+    <string name="current_token">Current token:</string>
+    <string name="replacement_token">Replacement token:</string>
+
     <!-- FileDialog -->
     <string name="clear">Clear</string>
     <string name="no_data">No Data</string>

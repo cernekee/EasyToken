@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="20dp"
+		android:text="@string/overwrite_confirm"
+		android:textAppearance="?android:attr/textAppearanceMedium" />
+
+	<View
+		android:layout_width="fill_parent"
+		android:layout_height="1dp"
+		android:background="@android:color/darker_gray"/>
+	
+	<TextView
+	    android:layout_marginTop="10dp"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/old_token_sn" />
+	<TextView
+	    android:layout_marginBottom="10dp"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/old_token_exp_date" />
+
+	<View
+		android:layout_width="fill_parent"
+		android:layout_height="1dp"
+		android:background="@android:color/darker_gray"/>
+		
+	<TextView
+	    android:layout_marginTop="10dp"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/new_token_sn" />
+	<TextView
+	    android:layout_marginBottom="10dp"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/new_token_exp_date" />
+
+	<View
+		android:layout_width="fill_parent"
+		android:layout_height="1dp"
+		android:background="@android:color/darker_gray"/>
+
+	<Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+		    
+    <LinearLayout
+	    android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+        android:orientation="horizontal">
+    
+	    <Button
+	        android:layout_marginTop="10dp"
+	        android:id="@+id/no_button"
+	        android:layout_gravity="right"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/no" />
+	    
+	    <Space
+	        android:layout_width="0dp"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1" />
+	    
+	    <Button
+	        android:layout_marginTop="10dp"
+	        android:id="@+id/yes_button"
+	        android:layout_gravity="right"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/yes" />
+
+	</LinearLayout>
+
+</LinearLayout>

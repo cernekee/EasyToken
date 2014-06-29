@@ -39,7 +39,8 @@ import de.blinkt.openvpn.FileSelect;
 public class ImportActivity extends Activity
 		implements ImportMethodFragment.OnImportMethodSelectedListener,
 		           ImportManualEntryFragment.OnManualEntryDoneListener,
-		           ImportUnlockFragment.OnUnlockDoneListener {
+		           ImportUnlockFragment.OnUnlockDoneListener,
+		           ImportConfirmFragment.OnConfirmDoneListener {
 
 	public static final String TAG = "EasyToken";
 
@@ -271,15 +272,22 @@ public class ImportActivity extends Activity
 
 			lib.destroy();
 		} else if (mStep == STEP_CONFIRM_OVERWRITE) {
-			// FIXME
 			LibStoken lib = importToken(mUri);
 			if (lib == null) {
 				/* mStep has already been advanced to an error state */
 				return;
 			}
-			finishImport(lib, mPin);
+
+			Bundle b = new Bundle();
+			b.putString(ImportConfirmFragment.ARG_NEW_TOKEN, mUri);
+			b.putString(ImportConfirmFragment.ARG_OLD_TOKEN,
+					TokenInfo.getDefaultToken().lib.encryptSeed(null, null));
+
+			f = new ImportConfirmFragment();
+			f.setArguments(b);
+			showFrag(f, animate);
+
 			lib.destroy();
-			finish();
 		}
 	}
 
@@ -379,5 +387,22 @@ public class ImportActivity extends Activity
 
 		unlockDone(lib);
 		lib.destroy();
+	}
+
+	@Override
+	public void onConfirmDone(boolean accepted) {
+		mStep = STEP_DONE;
+		if (!accepted) {
+			finish();
+			return;
+		}
+
+		LibStoken lib = importToken(mUri);
+		if (lib == null) {
+			/* mStep has already been advanced to an error state */
+			return;
+		}
+		finishImport(lib, mPin);
+		finish();
 	}
 }
