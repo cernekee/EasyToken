@@ -24,43 +24,40 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity
+		implements GettingStartedFragment.OnImportButtonClickedListener {
 
 	public static final String TAG = "EasyToken";
 
-	private Fragment mFrag;
+	private static final int REQ_IMPORT = 1;
 
-	@Override
-	protected void onResume() {
-		super.onResume();
+	private void setupFragment() {
+		Fragment frag;
 
 		TokenInfo info = TokenInfo.getDefaultToken();
-
 		if (info != null) {
-			mFrag = new TokencodeFragment();
-			Bundle b = new Bundle();
-			b.putInt(TokencodeFragment.EXTRA_ID, info.id);
-			mFrag.setArguments(b);
+			Bundle args = new Bundle();
+			args.putInt(TokencodeFragment.EXTRA_ID, info.id);
+
+			frag = new TokencodeFragment();
+			frag.setArguments(args);
 		} else {
-			mFrag = new GettingStartedFragment();
+			frag = new GettingStartedFragment();
 		}
 
 		getFragmentManager().beginTransaction()
-			.replace(android.R.id.content, mFrag)
+			.replace(android.R.id.content, frag)
 			.commit();
 	}
 
 	@Override
-	protected void onPause() {
-		if (mFrag != null) {
-			getFragmentManager().beginTransaction()
-				.remove(mFrag)
-				.commit();
-			mFrag = null;
-		}
-		super.onPause();
-	}
+	public void onCreate(Bundle b) {
+		super.onCreate(b);
 
+		if (b == null) {
+			setupFragment();
+		}
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -73,7 +70,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_import:
-			startActivity(new Intent(this, ImportActivity.class));
+			onImportButtonClicked();
 			return true;
 		case R.id.action_help:
 			FragActivity.start(this, HelpFragment.class);
@@ -86,4 +83,20 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	@Override
+	public void onImportButtonClicked() {
+		// clicking either "Import new token" from the menu, or "Import token" from
+		// GettingStartedFragment, will end up here
+		startActivityForResult(new Intent(this, ImportActivity.class), REQ_IMPORT);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+
+		if (requestCode == REQ_IMPORT) {
+			// (re)create TokencodeFragment if a new token was imported
+			setupFragment();
+		}
+	}
 }

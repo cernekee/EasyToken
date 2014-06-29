@@ -35,6 +35,10 @@ public class GettingStartedFragment extends Fragment {
 
 	public static final String TAG = "EasyToken";
 
+	public interface OnImportButtonClickedListener {
+		public void onImportButtonClicked();
+	};
+
 	private void setupButtons(View v) {
 
 		final Activity act = getActivity();
@@ -44,7 +48,8 @@ public class GettingStartedFragment extends Fragment {
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(act, ImportActivity.class));
+				OnImportButtonClickedListener callback = (OnImportButtonClickedListener)act;
+				callback.onImportButtonClicked();
 			}
 		});
 
