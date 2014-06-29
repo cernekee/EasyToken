@@ -49,7 +49,7 @@
     <string name="manual_prompt">Enter your token string here:</string>
     <string name="examples">Examples:</string>
     <string name="manual_examples" translatable="false">29624-04141-91521-01027-05321-47115-52307-&#8230;\n2806706667477513430277017220171264075514&#8230;</string>
-    <string name="manual_help">The \"Next\" button will become active once a valid token string is entered.</string>
+    <string name="manual_help">The \"Next\" button will become active once a valid token string is entered. To paste, long-press the input area.</string>
 
     <string name="token_file_unreadable">Unable to read the token file:</string>
     <string name="token_file_invalid">Unable to parse the token file. Please contact your system administrator.</string>
