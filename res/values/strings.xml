@@ -46,6 +46,10 @@
     <string name="manual_examples" translatable="false">29624-04141-91521-01027-05321-47115-52307-&#8230;\n2806706667477513430277017220171264075514&#8230;</string>
     <string name="manual_help">The \"Next\" button will become active once a valid token string is entered.</string>
 
+    <string name="token_file_unreadable">Unable to read the token file:</string>
+    <string name="token_file_invalid">Unable to parse the token file. Please contact your system administrator.</string>
+    <string name="token_string_invalid">Unable to parse the token string. Please contact your system administrator.\n\nToken:</string>
+
     <string name="qr_prompt_title">Install Barcode Scanner?</string>
     <string name="qr_prompt_message">Importing a QR code requires Barcode Scanner, a free app. Would you like to install it?</string>
 

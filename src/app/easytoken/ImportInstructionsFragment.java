@@ -38,7 +38,12 @@ public class ImportInstructionsFragment extends Fragment {
 	public static final String TAG = "EasyToken";
 
 	public static final String PFX = "app.easytoken.";
-	public static final String ARG_INPUT_METHOD = PFX + "input_method";
+	public static final String ARG_INST_TYPE = PFX + "inst_type";
+	public static final String ARG_TOKEN_DATA = PFX + "token_data";
+
+	public static final String INST_URI_HELP = "uri_help";
+	public static final String INST_BAD_TOKEN = "bad_token";
+	public static final String INST_FILE_ERROR = "file_error";
 
 	private void setHtml(TextView tv, int resId) {
 
@@ -75,15 +80,26 @@ public class ImportInstructionsFragment extends Fragment {
 
 		Bundle b = getArguments();
 		TextView tv = (TextView)v.findViewById(R.id.import_help);
+		TextView extv = (TextView)v.findViewById(R.id.import_examples);
 
-		String method = b.getString(ARG_INPUT_METHOD);
-		if (method.equals("uri")) {
+		String method = b.getString(ARG_INST_TYPE);
+		if (method.equals(INST_URI_HELP)) {
 			setHtml(tv, R.string.import_uri_help);
 
-			tv = (TextView)v.findViewById(R.id.import_examples);
-			tv.setHorizontallyScrolling(true);
-			tv.setMovementMethod(new ScrollingMovementMethod());
-			setHtml(tv, R.string.import_uri_examples);
+			extv.setHorizontallyScrolling(true);
+			extv.setMovementMethod(new ScrollingMovementMethod());
+			setHtml(extv, R.string.import_uri_examples);
+		} else if (method.equals(INST_FILE_ERROR)) {
+			setHtml(tv, R.string.token_file_unreadable);
+			extv.setText(b.getString(ARG_TOKEN_DATA));
+		} else if (method.equals(INST_BAD_TOKEN)) {
+			String data = b.getString(ARG_TOKEN_DATA);
+			if ("".equals(data)) {
+				setHtml(tv, R.string.token_file_invalid);
+			} else {
+				setHtml(tv, R.string.token_string_invalid);
+				extv.setText(data);
+			}
 		}
 
         Button button = (Button)v.findViewById(R.id.ok_button);

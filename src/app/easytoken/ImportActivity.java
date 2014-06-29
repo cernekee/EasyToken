@@ -20,6 +20,8 @@ package app.easytoken;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.stoken.LibStoken;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -47,6 +49,7 @@ public class ImportActivity extends Activity
 	private static final int STEP_URI_INSTRUCTIONS = 2;
 	private static final int STEP_IMPORT_TOKEN = 3;
 	private static final int STEP_MANUAL_ENTRY = 4;
+	private static final int STEP_ERROR = 5;
 
 	private static final int REQ_SCAN_QR = IntentIntegrator.REQUEST_CODE;
 	private static final int REQ_PICK_FILE = REQ_SCAN_QR + 1;
@@ -57,10 +60,14 @@ public class ImportActivity extends Activity
 	private int mStep;
 	private String mInputMethod;
 	private String mUri;
+	private String mErrorType;
+	private String mErrorData;
 
 	private static final String STATE_STEP = PFX + "step";
 	private static final String STATE_INPUT_METHOD = PFX + "input_method";
 	private static final String STATE_URI = PFX + "uri";
+	private static final String STATE_ERROR_TYPE = PFX + "error_type";
+	private static final String STATE_ERROR_DATA = PFX + "error_data";
 
 	@Override
 	public void onCreate(Bundle b) {
@@ -70,6 +77,8 @@ public class ImportActivity extends Activity
 			mStep = b.getInt(STATE_STEP);
 			mInputMethod = b.getString(STATE_INPUT_METHOD);
 			mUri = b.getString(STATE_URI);
+			mErrorType = b.getString(STATE_ERROR_TYPE);
+			mErrorData = b.getString(STATE_ERROR_DATA);
 		} else {
 			Intent i = this.getIntent();
 			if (i != null) {
@@ -98,6 +107,8 @@ public class ImportActivity extends Activity
 		b.putInt(STATE_STEP, mStep);
 		b.putString(STATE_INPUT_METHOD, mInputMethod);
 		b.putString(STATE_URI, mUri);
+		b.putString(STATE_ERROR_TYPE, mErrorType);
+		b.putString(STATE_ERROR_DATA, mErrorData);
 	}
 
 	private void showFrag(Fragment f, boolean animate) {
@@ -108,6 +119,42 @@ public class ImportActivity extends Activity
 		}
 
 		ft.replace(android.R.id.content, f).commit();
+	}
+
+	private void importToken(String data) {
+		Uri uri = Uri.parse(data);
+		String path = uri.getPath();
+		boolean isFile = false;
+
+		if ("file".equals(uri.getScheme()) && path != null) {
+			/*
+			 * Arguably we shouldn't take file:// URIs from QR codes,
+			 * and maybe we should be more careful about what we accept
+			 * from other apps too
+			 */
+			isFile = true;
+			data = Misc.readStringFromFile(path);
+			if (data == null) {
+				mStep = STEP_ERROR;
+				mErrorType = ImportInstructionsFragment.INST_FILE_ERROR;
+				mErrorData = path;
+				handleImportStep();
+				return;
+			}
+		}
+
+		LibStoken lib = new LibStoken();
+		if (lib.importString(data) != LibStoken.SUCCESS) {
+			mStep = STEP_ERROR;
+			mErrorType = ImportInstructionsFragment.INST_BAD_TOKEN;
+			mErrorData = isFile ? "" : data;
+			handleImportStep();
+			lib.destroy();
+			return;
+		}
+
+		/* FIXME: figure out whether to prompt for devid/password/PIN */
+
 	}
 
 	private void handleImportStep() {
@@ -124,7 +171,8 @@ public class ImportActivity extends Activity
 			showFrag(new ImportMethodFragment(), animate);
 		} else if (mStep == STEP_URI_INSTRUCTIONS) {
 			Bundle b = new Bundle();
-			b.putString(ImportInstructionsFragment.ARG_INPUT_METHOD, mInputMethod);
+			b.putString(ImportInstructionsFragment.ARG_INST_TYPE,
+					    ImportInstructionsFragment.INST_URI_HELP);
 
 			f = new ImportInstructionsFragment();
 			f.setArguments(b);
@@ -132,8 +180,15 @@ public class ImportActivity extends Activity
 		} else if (mStep == STEP_MANUAL_ENTRY) {
 			showFrag(new ImportManualEntryFragment(), animate);
 		} else if (mStep == STEP_IMPORT_TOKEN) {
-			// FIXME: parse URI and figure out what to do next
-			android.util.Log.d(TAG, "XXX importing URI " + mUri);
+			importToken(mUri);
+		} else if (mStep == STEP_ERROR) {
+			Bundle b = new Bundle();
+			b.putString(ImportInstructionsFragment.ARG_INST_TYPE, mErrorType);
+			b.putString(ImportInstructionsFragment.ARG_TOKEN_DATA, mErrorData);
+
+			f = new ImportInstructionsFragment();
+			f.setArguments(b);
+			showFrag(f, animate);
 		}
 	}
 
