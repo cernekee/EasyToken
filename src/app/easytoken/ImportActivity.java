@@ -163,7 +163,7 @@ public class ImportActivity extends Activity
 		return lib;
 	}
 
-	private void finishImport(LibStoken lib) {
+	private void writeNewToken(LibStoken lib) {
 		TokenInfo info;
 
 		info = TokenInfo.getDefaultToken();
@@ -173,17 +173,16 @@ public class ImportActivity extends Activity
 
 		info = new TokenInfo(lib, null);
 		info.save();
-
-		mStep = STEP_DONE;
-		finish();
 	}
 
 	private void unlockDone(LibStoken lib) {
+		mUri = lib.encryptSeed(null, null);
+
 		if (TokenInfo.getDefaultToken() != null) {
 			mStep = STEP_CONFIRM_OVERWRITE;
-			handleImportStep();
 		} else {
-			finishImport(lib);
+			writeNewToken(lib);
+			mStep = STEP_DONE;
 		}
 	}
 
@@ -222,6 +221,7 @@ public class ImportActivity extends Activity
 					showError(ImportInstructionsFragment.INST_BAD_TOKEN, mUri);
 					return;
 				}
+				/* advances mStep to either STEP_DONE or STEP_CONFIRM_OVERWRITE */
 				unlockDone(lib);
 			}
 			lib.destroy();
@@ -274,6 +274,8 @@ public class ImportActivity extends Activity
 			showFrag(f, animate);
 
 			lib.destroy();
+		} else if (mStep == STEP_DONE) {
+			finish();
 		}
 	}
 
@@ -368,24 +370,22 @@ public class ImportActivity extends Activity
 			return;
 		}
 
-		mUri = lib.encryptSeed(null, null);
 		unlockDone(lib);
+		handleImportStep();
 		lib.destroy();
 	}
 
 	@Override
 	public void onConfirmDone(boolean accepted) {
+		if (accepted) {
+			LibStoken lib = importToken(mUri, true);
+			if (lib == null) {
+				/* mStep has already been advanced to an error state */
+				return;
+			}
+			writeNewToken(lib);
+		}
 		mStep = STEP_DONE;
-		if (!accepted) {
-			finish();
-			return;
-		}
-
-		LibStoken lib = importToken(mUri, true);
-		if (lib == null) {
-			/* mStep has already been advanced to an error state */
-			return;
-		}
-		finishImport(lib);
+		handleImportStep();
 	}
 }
