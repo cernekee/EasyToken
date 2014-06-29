@@ -54,12 +54,17 @@ public class TokencodeFragment extends Fragment
 	private static final String PFX = "app.easytoken.";
 	public static final String EXTRA_ID = PFX + "ID";
 
+	private String mPin;
+	private boolean mPinRequested;
+
+	private static final String STATE_PIN = PFX + "mPin";
+	private static final String STATE_PIN_REQUESTED = PFX + "mPinRequested";
+
 	private TextView mTokencode;
 	private String mRawTokencode = "";
 	private ProgressBar mProgressBar;
 	private View mView;
 
-	private String mPin;
 	private boolean mNeedsPin = false;
 	private AlertDialog mDialog;
 
@@ -107,12 +112,15 @@ public class TokencodeFragment extends Fragment
 		pinButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				pinDialog();
+				mDialog = changePinDialog();
 			}
 		});
 
 		/* static fields */
 		LibStoken.StokenInfo info = mBackend.info.lib.getInfo();
+
+		mNeedsPin = mBackend.info.lib.isPINRequired();
+		pinButton.setEnabled(mNeedsPin);
 
 		writeStatusField(R.id.token_sn, R.string.token_sn, info.serial);
 		mProgressBar.setMax(info.interval - 1);
@@ -138,13 +146,30 @@ public class TokencodeFragment extends Fragment
     		Log.e(TAG, "Error initializing TokencodeFragment");
     	}
 
-		// XXX set mPin = "" if PIN is not needed
-		mPin = "0000";
-
 		v = inflater.inflate(R.layout.token_diag_info, container, false);
+		// depends on mBackend
 		populateView(v);
 
+    	if (savedInstanceState != null) {
+    		mPin = savedInstanceState.getString(STATE_PIN);
+    		mPinRequested = savedInstanceState.getBoolean(STATE_PIN_REQUESTED);
+    	}
+
+		if (mPin == null && mNeedsPin) {
+			if (!mBackend.info.pin.equals("")) {
+				mPin = mBackend.info.pin;
+			}
+		}
+		// depends on mView from populateView()
+		setPin(mPin, false);
+
     	return v;
+    }
+
+    @Override
+	public void onSaveInstanceState(Bundle b) {
+    	b.putString(STATE_PIN, mPin);
+    	b.putBoolean(STATE_PIN_REQUESTED, mPinRequested);
     }
 
     @Override
@@ -153,65 +178,36 @@ public class TokencodeFragment extends Fragment
     	super.onDestroy();
     }
 
-    private void setPin(String s) {
+    private void setPin(String s, boolean userRequest) {
     	int res;
     	boolean warn = false;
+
+    	if (userRequest) {
+    		// if the user set this (PIN or no PIN), don't bug him again
+    		mPinRequested = true;
+    	}
 
     	mPin = s;
 		if (!mNeedsPin) {
 			res = R.string.not_required;
 		} else if (s == null) {
 			mPin = null;
+			mBackend.info.pin = "";
+			mBackend.info.save();
 			warn = true;
 			res = R.string.no;
 		} else {
+			mBackend.info.pin = s;
+			mBackend.info.save();
 			res = R.string.yes;
 		}
 
 		writeStatusField(R.id.using_pin, R.string.using_pin, getString(res), warn);
     }
 
-    private void pinDialog() {
-    	Context ctx = getActivity();
-
-    	if (mDialog != null) {
-    		return;
-    	}
-
-    	final TextView tv = new EditText(ctx);
-		tv.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-		tv.setTransformationMethod(PasswordTransformationMethod.getInstance());
-
-    	AlertDialog.Builder builder = new AlertDialog.Builder(ctx)
-    		.setView(tv)
-    		.setTitle(R.string.enter_pin)
-    		.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface arg0, int arg1) {
-					setPin(tv.getText().toString().trim());
-					//FragCache.put(mUUID, EXTRA_PIN_PROMPTED, "true");
-				}
-    		})
-    		.setNegativeButton(R.string.skip, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface arg0, int arg1) {
-					setPin(null);
-					//FragCache.put(mUUID, EXTRA_PIN_PROMPTED, "true");
-				}
-    		});
-    	mDialog = builder.create();
-    	mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				// XXX
-				mPin = "";
-				mDialog = null;
-			}
-    	});
-    	mDialog.show();
-
+    private void setupTextWatcher(AlertDialog d, final TextView tv) {
     	/* gray out the OK button until a sane-looking PIN is entered */
-		final Button okButton = mDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+		final Button okButton = d.getButton(AlertDialog.BUTTON_POSITIVE);
 		okButton.setEnabled(false);
 
 		tv.addTextChangedListener(new TextWatcher() {
@@ -231,14 +227,86 @@ public class TokencodeFragment extends Fragment
 		});
     }
 
+    private AlertDialog enterPinDialog() {
+    	Context ctx = getActivity();
+    	AlertDialog d;
+
+    	final TextView tv = new EditText(ctx);
+		tv.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		tv.setTransformationMethod(PasswordTransformationMethod.getInstance());
+
+    	AlertDialog.Builder builder = new AlertDialog.Builder(ctx)
+    		.setView(tv)
+    		.setTitle(R.string.enter_pin)
+    		.setMessage(R.string.enter_pin_message)
+    		.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface arg0, int arg1) {
+					setPin(tv.getText().toString().trim(), true);
+					mDialog = null;
+				}
+    		})
+    		.setNegativeButton(R.string.no_pin, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface arg0, int arg1) {
+					setPin(null, true);
+					mDialog = null;
+				}
+    		});
+    	d = builder.create();
+    	d.setCancelable(false);
+    	d.show();
+    	setupTextWatcher(d, tv);
+
+		return d;
+    }
+
+    private AlertDialog changePinDialog() {
+    	Context ctx = getActivity();
+    	AlertDialog d;
+
+    	final TextView tv = new EditText(ctx);
+		tv.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		tv.setTransformationMethod(PasswordTransformationMethod.getInstance());
+
+    	AlertDialog.Builder builder = new AlertDialog.Builder(ctx)
+    		.setView(tv)
+    		.setTitle(R.string.new_pin)
+    		.setMessage(R.string.new_pin_message)
+    		.setPositiveButton(R.string.change, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface arg0, int arg1) {
+					setPin(tv.getText().toString().trim(), true);
+				}
+    		})
+    		.setNeutralButton(R.string.no_pin, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface arg0, int arg1) {
+					setPin(null, true);
+				}
+    		})
+    		.setNegativeButton(R.string.cancel, null);
+    	d = builder.create();
+    	d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				// back button -> cancel PIN change
+				mDialog = null;
+			}
+    	});
+    	d.show();
+    	setupTextWatcher(d, tv);
+
+		return d;
+    }
+
     @Override
     public void onResume() {
     	super.onResume();
     	mBackend.onResume();
 
-    	if (mPin == null) {
-    		android.util.Log.d(TAG, "XXX show PIN dialog");
-    		// mDialog = pinDialog();
+    	if (mNeedsPin && mPin == null && !mPinRequested) {
+    		mDialog = enterPinDialog();
     	}
     }
 
@@ -255,6 +323,13 @@ public class TokencodeFragment extends Fragment
 
 	@Override
 	public void onTokencodeUpdate(String tokencode, String nextTokencode, int secondsLeft) {
+
+		if (mDialog != null) {
+			// wait for user entry instead of displaying bogus data
+			tokencode = nextTokencode = "";
+			secondsLeft = 0;
+		}
+
 		mProgressBar.setProgress(secondsLeft - 1);
 		mRawTokencode = tokencode;
 		mTokencode.setText(TokencodeBackend.formatTokencode(mRawTokencode));

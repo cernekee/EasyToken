@@ -22,9 +22,14 @@
     <string name="exp_date">Expiration date:</string>
     <string name="gmt">Current time (GMT):</string>
     <string name="dev_id">SecurID device ID:</string>
-    <string name="enter_pin">Enter PIN:</string>
+    <string name="enter_pin">Enter PIN</string>
     <string name="new_pin">New PIN</string>
     <string name="skip">Skip</string>
+
+    <string name="enter_pin_message">Enter the PIN that you normally use with this token. If you are setting up a newly issued token with no PIN, click \"No PIN\" and follow the instructions provided by your system administrator.</string>
+    <string name="new_pin_message">This changes the PIN used locally to calculate your tokencode. It will NOT automatically change the PIN on your account.</string>
+    <string name="change">Change</string>
+    <string name="no_pin">No PIN</string>
 
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
