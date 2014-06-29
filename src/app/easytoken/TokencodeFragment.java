@@ -50,10 +50,8 @@ import android.widget.Toast;
 public class TokencodeFragment extends Fragment {
 	public static final String TAG = "EasyToken";
 
-	public static final String EXTRA_ID = "app.easytoken.ID";
-	public static final String EXTRA_UUID = "app.openconnect.UUID";
-	public static final String EXTRA_PIN = "app.openconnect.PIN";
-	public static final String EXTRA_PIN_PROMPTED = "app.openconnect.PIN_PROMPTED";
+	private static final String PFX = "app.easytoken.";
+	public static final String EXTRA_ID = PFX + "ID";
 
 	private TokenInfo mTok;
 	private LibStoken mStoken;
