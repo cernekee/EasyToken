@@ -202,6 +202,10 @@ public class TokencodeFragment extends Fragment
 			res = R.string.yes;
 		}
 
+		if (userRequest) {
+			TokencodeWidgetService.restart(getActivity());
+		}
+
 		writeStatusField(R.id.using_pin, R.string.using_pin, getString(res), warn);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Application: one-time initialization at app startup
+ * TokencodeWidget: provides a home screen / lock screen widget
  *
  * This file is part of Easy Token
  * Copyright (c) 2014, Kevin Cernekee <cernekee@gmail.com>
@@ -17,13 +17,17 @@
 
 package app.easytoken;
 
-public class Application extends android.app.Application {
+import android.appwidget.AppWidgetProvider;
+import android.content.Context;
+import android.content.Intent;
+
+public class TokencodeWidget extends AppWidgetProvider {
+
+	public static final String TAG = "EasyToken";
 
 	@Override
-	public void onCreate() {
-		super.onCreate();
-		System.loadLibrary("stoken");
-		TokenInfo.init(getApplicationContext());
-		TokencodeWidgetService.kick(getApplicationContext());
+	public void onReceive(Context context, Intent intent) {
+		super.onReceive(context, intent);
+		TokencodeWidgetService.kick(context);
 	}
 }

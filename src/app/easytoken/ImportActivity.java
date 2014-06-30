@@ -173,6 +173,8 @@ public class ImportActivity extends Activity
 
 		info = new TokenInfo(lib, null);
 		info.save();
+
+		TokencodeWidgetService.restart(this);
 	}
 
 	private void unlockDone(LibStoken lib) {
