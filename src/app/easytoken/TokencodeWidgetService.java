@@ -94,7 +94,8 @@ public class TokencodeWidgetService extends Service
 
 			if (startBackend() == false) {
 				mTokencode = "NO TOKEN";
-				mSecondsLeft = 0;
+				mSecondsLeft = 60;
+				mInterval = 60;
 				updateWidgets();
 				stopSelf();
 			}
