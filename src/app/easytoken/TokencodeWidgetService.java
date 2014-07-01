@@ -23,7 +23,10 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.util.TypedValue;
 import android.widget.RemoteViews;
 
 public class TokencodeWidgetService extends Service
@@ -104,24 +107,48 @@ public class TokencodeWidgetService extends Service
 		return null;
 	}
 
+	private float calcFontSize(Bundle options, int defFontSizeId) {
+        Resources res = mContext.getResources();
+
+        float fontSizePx = res.getDimension(R.dimen.widget_typical_fontsize);
+
+        int widgetWidthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
+        if (widgetWidthDp == 0) {
+        	return fontSizePx;
+        }
+
+        float widgetWidthPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, widgetWidthDp,
+        		res.getDisplayMetrics());
+        float typWidthPx = res.getDimension(R.dimen.widget_typical_width);
+
+        return fontSizePx * widgetWidthPx / typWidthPx;
+	}
+
 	private int updateWidgets() {
 		AppWidgetManager mgr = AppWidgetManager.getInstance(mContext);
 		final int ids[] = mgr.getAppWidgetIds(mComponent);
+		final int N = ids.length;
 
-        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget);
-        views.setTextViewText(R.id.tokencode, mTokencode);
-        views.setProgressBar(R.id.progress_bar, mInterval - 1, mSecondsLeft - 1, false);
+		for (int i = 0; i < N; i++) {
+			int id = ids[i];
 
-        Intent intent = new Intent(mContext, MainActivity.class);
-        PendingIntent pi =
-        		PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.tokencode, pi);
+	        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget);
 
-		for (int i = 0; i < ids.length; i++) {
-			mgr.updateAppWidget(ids[i], views);
+	        views.setTextViewText(R.id.tokencode, mTokencode);
+	        views.setTextViewTextSize(R.id.tokencode, TypedValue.COMPLEX_UNIT_PX,
+	        		calcFontSize(mgr.getAppWidgetOptions(id), R.dimen.widget_typical_fontsize));
+
+	        views.setProgressBar(R.id.progress_bar, mInterval - 1, mSecondsLeft - 1, false);
+
+	        Intent intent = new Intent(mContext, MainActivity.class);
+	        PendingIntent pi =
+	        		PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+	        views.setOnClickPendingIntent(R.id.tokencode, pi);
+
+			mgr.updateAppWidget(id, views);
 		}
 
-		return ids.length;
+		return N;
 	}
 
 	@Override
