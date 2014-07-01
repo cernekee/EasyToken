@@ -108,10 +108,10 @@ public class TokencodeWidgetService extends Service
 		return null;
 	}
 
-	private float calcFontSize(Bundle options, int defFontSizeId) {
+	private float scaleView(Bundle options, int defFontSizeId) {
         Resources res = mContext.getResources();
 
-        float fontSizePx = res.getDimension(R.dimen.widget_typical_fontsize);
+        float fontSizePx = res.getDimension(defFontSizeId);
 
         int widgetWidthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
         if (widgetWidthDp == 0) {
@@ -134,17 +134,20 @@ public class TokencodeWidgetService extends Service
 			int id = ids[i];
 
 	        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget);
+	        Bundle options = mgr.getAppWidgetOptions(id);
 
 	        views.setTextViewText(R.id.tokencode, mTokencode);
 	        views.setTextViewTextSize(R.id.tokencode, TypedValue.COMPLEX_UNIT_PX,
-	        		calcFontSize(mgr.getAppWidgetOptions(id), R.dimen.widget_typical_fontsize));
+	        		scaleView(options, R.dimen.widget_typical_fontsize));
 
 	        views.setProgressBar(R.id.progress_bar, mInterval - 1, mSecondsLeft - 1, false);
+	        int padding = (int)scaleView(options, R.dimen.widget_typical_padding);
+	        views.setViewPadding(R.id.box, padding, padding, padding, padding);
 
 	        Intent intent = new Intent(mContext, MainActivity.class);
 	        PendingIntent pi =
 	        		PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-	        views.setOnClickPendingIntent(R.id.tokencode, pi);
+	        views.setOnClickPendingIntent(R.id.box, pi);
 
 			mgr.updateAppWidget(id, views);
 		}

@@ -6,6 +6,7 @@
 
     <dimen name="widget_typical_width">150dp</dimen>
     <dimen name="widget_typical_height">65dp</dimen>
-    <dimen name="widget_typical_fontsize">28dp</dimen>
+    <dimen name="widget_typical_fontsize">26dp</dimen>
+    <dimen name="widget_typical_padding">3dp</dimen>
 
 </resources>
