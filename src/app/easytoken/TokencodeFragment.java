@@ -120,7 +120,7 @@ public class TokencodeFragment extends Fragment
 		/* static fields */
 		LibStoken.StokenInfo info = mBackend.info.lib.getInfo();
 
-		mNeedsPin = mBackend.info.lib.isPINRequired();
+		mNeedsPin = mBackend.info.pinRequired;
 		pinButton.setEnabled(mNeedsPin);
 
 		writeStatusField(R.id.token_sn, R.string.token_sn, info.serial);

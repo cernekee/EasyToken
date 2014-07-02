@@ -36,6 +36,7 @@ public class TokenInfo {
 	public String name;
 	public String pin;
 	public int id = -1;
+	public boolean pinRequired;
 
 	private static SharedPreferences mPrefs;
 	private static int mMaxId;
@@ -137,6 +138,9 @@ public class TokenInfo {
 		this.lib = lib;
 		this.pin = (pin == null) ? "" : pin;
 		this.name = name;
+
+		// This changes to false if computeTokencode() is called with a PIN
+		this.pinRequired = lib.isPINRequired();
 	}
 
 	public TokenInfo(LibStoken lib, String pin) {
@@ -200,6 +204,10 @@ public class TokenInfo {
 		}
 
 		return id;
+	}
+
+	public boolean isPinMissing() {
+		return pinRequired && pin.equals("");
 	}
 
 	@Override
