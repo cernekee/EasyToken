@@ -155,8 +155,8 @@ public class TokencodeWidgetService extends Service
 	        views.setViewPadding(R.id.box, padding, padding, padding, padding);
 
 	        Intent intent = new Intent(mContext, MainActivity.class);
-	        PendingIntent pi =
-	        		PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+	        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+	        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
 	        views.setOnClickPendingIntent(R.id.box, pi);
 
 			mgr.updateAppWidget(id, views);
