@@ -21,12 +21,11 @@ import java.util.Calendar;
 
 import org.stoken.LibStoken;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
 
 public class TokencodeBackend extends BroadcastReceiver {
 
@@ -38,51 +37,46 @@ public class TokencodeBackend extends BroadcastReceiver {
 	private Context mContext;
 	private OnTokencodeUpdateListener mListener;
 
+	private final int INTERVAL_MS = 1000;
+	private boolean mIsRunning;
+	private Handler mHandler;
+	private Runnable mRunnable;
+
 	private boolean mCallbackEnabled;
 	private Calendar mLastUpdate;
 	private String mTokencode;
 	private String mNextTokencode;
 
-	private static PendingIntent mPendingIntent;
-	private static int mRefcount;
-
-	private static final String TOKENCODE_ALARM = "app.easytoken.tokencode_alarm";
+	private boolean mScreenOn = true;
 
 	public interface OnTokencodeUpdateListener {
 		/* Strings are unformatted.  secondsLeft ranges from 1..30 or 1..60 */
 		public void onTokencodeUpdate(String tokencode, String nextTokencode, int secondsLeft);
 	};
 
-	private static void updateRefcount(Context ctx, boolean increment) {
-		if (increment) {
-			if (mRefcount == 0) {
-				Intent intent = new Intent(TOKENCODE_ALARM);
-				mPendingIntent = PendingIntent.getBroadcast(ctx, 0, intent, 0);
+	private void startOrStop() {
+		boolean shouldRun = mScreenOn && mCallbackEnabled;
 
-				AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
-				am.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 1000, mPendingIntent);
-			}
-			mRefcount++;
-		} else {
-			mRefcount--;
-			if (mRefcount == 0) {
-				AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
-				am.cancel(mPendingIntent);
-				mPendingIntent = null;
-			}
+		if (shouldRun && !mIsRunning) {
+			// this does one update and then schedules the next one
+			doUpdate(true);
+		} else if (!shouldRun && mIsRunning) {
+			mHandler.removeCallbacks(mRunnable);
 		}
+
+		mIsRunning = shouldRun;
 	}
 
 	public void onResume() {
 		// start callback events
 		mCallbackEnabled = true;
-		updateRefcount(mContext, true);
+		startOrStop();
 	}
 
 	public void onPause() {
 		// pause callback events
-		updateRefcount(mContext, false);
 		mCallbackEnabled = false;
+		startOrStop();
 	}
 
 	public boolean init(Context ctx, OnTokencodeUpdateListener listener, int tokenId) {
@@ -94,9 +88,20 @@ public class TokencodeBackend extends BroadcastReceiver {
 			return false;
 		}
 
+		mHandler = new Handler();
+		mRunnable = new Runnable() {
+			@Override
+			public void run() {
+				doUpdate(true);
+			}
+		};
+
 		stokenInfo = info.lib.getInfo();
 
-		mContext.registerReceiver(this, new IntentFilter(TOKENCODE_ALARM));
+		IntentFilter filt = new IntentFilter();
+		filt.addAction(Intent.ACTION_SCREEN_OFF);
+		filt.addAction(Intent.ACTION_SCREEN_ON);
+		mContext.registerReceiver(this, filt);
 
 		return true;
 	}
@@ -115,11 +120,17 @@ public class TokencodeBackend extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		if (!mCallbackEnabled) {
-			// somebody else might be using the periodic broadcast, but it's not us
-			return;
-		}
+		String action = intent.getAction();
 
+		if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+			mScreenOn = false;
+		} else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+			mScreenOn = true;
+		}
+		startOrStop();
+	}
+
+	private void doUpdate(boolean reschedule) {
     	Calendar now = Calendar.getInstance();
 		int second = now.get(Calendar.SECOND);
 		int interval = stokenInfo.interval;
@@ -141,6 +152,14 @@ public class TokencodeBackend extends BroadcastReceiver {
     	}
 
 		mListener.onTokencodeUpdate(mTokencode, mNextTokencode, interval - (second % interval));
+
+		if (reschedule) {
+			mHandler.postDelayed(mRunnable, INTERVAL_MS);
+		}
+	}
+
+	public void updateNow() {
+		doUpdate(false);
 	}
 
     public static String formatTokencode(String s) {
