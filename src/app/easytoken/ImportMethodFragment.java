@@ -39,7 +39,9 @@ public class ImportMethodFragment extends ListFragment {
 
 	private static final int NO_SELECTION = -1;
 
+	private Button mButton;
 	private int mPos = NO_SELECTION;
+
 	private static final String STATE_POS = PFX + "pos";
 
 	public interface OnImportMethodSelectedListener {
@@ -71,6 +73,7 @@ public class ImportMethodFragment extends ListFragment {
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		mPos = position;
+		mButton.setEnabled(true);
 	}
 
 	@Override
@@ -83,15 +86,18 @@ public class ImportMethodFragment extends ListFragment {
                        android.R.layout.simple_list_item_single_choice,
                        names));
 
+        mButton = (Button)view.findViewById(R.id.next_button);
         ListView lv = getListView();
-        lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
+        lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         if (mPos != NO_SELECTION) {
     		lv.setItemChecked(mPos, true);
+    		mButton.setEnabled(true);
+        } else {
+        	mButton.setEnabled(false);
         }
 
-        Button button = (Button)view.findViewById(R.id.next_button);
-        button.setOnClickListener(new OnClickListener() {
+        mButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
