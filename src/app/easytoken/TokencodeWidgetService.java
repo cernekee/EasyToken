@@ -78,8 +78,8 @@ public class TokencodeWidgetService extends Service
 
 		mBackend = new TokencodeBackend();
 		mBackend.init(mContext.getApplicationContext(), this, t.id);
-		mBackend.onResume();
 		mInterval = mBackend.info.lib.getInfo().interval;
+		mBackend.onResume();
 
 		return true;
 	}
