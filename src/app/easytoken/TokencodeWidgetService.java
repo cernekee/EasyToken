@@ -40,6 +40,7 @@ public class TokencodeWidgetService extends Service
 
 	private TokencodeBackend mBackend;
 
+	private boolean mError;
 	private String mTokencode = "";
 	private int mSecondsLeft;
 	private int mInterval;
@@ -91,15 +92,24 @@ public class TokencodeWidgetService extends Service
 			mContext = getApplicationContext();
 			mComponent = new ComponentName(mContext, TokencodeWidget.class);
 			mInitDone = true;
+			mError = false;
 
 			if (startBackend() == false) {
 				mTokencode = "NO TOKEN";
-				mSecondsLeft = 60;
-				mInterval = 60;
-				updateWidgets();
-				stopSelf();
+				mError = true;
+			} else if (mBackend.info.isPinMissing()) {
+				mTokencode = "NO PIN";
+				mError = true;
 			}
 		}
+
+		if (mError) {
+			stopBackend();
+			mSecondsLeft = mInterval = 60;
+			updateWidgets();
+			stopSelf();
+		}
+
 		return START_STICKY;
 	}
 
