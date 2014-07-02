@@ -67,6 +67,7 @@ public class TokencodeFragment extends Fragment
 
 	private boolean mNeedsPin = false;
 	private AlertDialog mDialog;
+	private boolean mSuspendTokencode;
 
 	private TokencodeBackend mBackend;
 
@@ -161,7 +162,7 @@ public class TokencodeFragment extends Fragment
 			}
 		}
 		// depends on mView from populateView()
-		setPin(mPin, false);
+		setPin(mPin);
 
     	return v;
     }
@@ -178,14 +179,9 @@ public class TokencodeFragment extends Fragment
     	super.onDestroy();
     }
 
-    private void setPin(String s, boolean userRequest) {
+    private void setPin(String s) {
     	int res;
     	boolean warn = false;
-
-    	if (userRequest) {
-    		// if the user set this (PIN or no PIN), don't bug him again
-    		mPinRequested = true;
-    	}
 
     	mPin = s;
 		if (!mNeedsPin) {
@@ -202,11 +198,15 @@ public class TokencodeFragment extends Fragment
 			res = R.string.yes;
 		}
 
-		if (userRequest) {
-			TokencodeWidgetService.restart(getActivity());
-		}
-
 		writeStatusField(R.id.using_pin, R.string.using_pin, getString(res), warn);
+    }
+
+    private void finishPinDialog(String pin) {
+    	mSuspendTokencode = false;
+    	setPin(pin);
+    	mPinRequested = true;
+    	mBackend.updateNow();
+    	TokencodeWidgetService.restart(getActivity());
     }
 
     private void setupTextWatcher(AlertDialog d, final TextView tv) {
@@ -246,14 +246,14 @@ public class TokencodeFragment extends Fragment
     		.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					setPin(tv.getText().toString().trim(), true);
+					finishPinDialog(tv.getText().toString().trim());
 					mDialog = null;
 				}
     		})
     		.setNegativeButton(R.string.no_pin, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					setPin(null, true);
+					finishPinDialog(null);
 					mDialog = null;
 				}
     		});
@@ -280,13 +280,13 @@ public class TokencodeFragment extends Fragment
     		.setPositiveButton(R.string.change, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					setPin(tv.getText().toString().trim(), true);
+					finishPinDialog(tv.getText().toString().trim());
 				}
     		})
     		.setNeutralButton(R.string.no_pin, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					setPin(null, true);
+					finishPinDialog(null);
 				}
     		})
     		.setNegativeButton(R.string.cancel, null);
@@ -307,11 +307,12 @@ public class TokencodeFragment extends Fragment
     @Override
     public void onResume() {
     	super.onResume();
-    	mBackend.onResume();
 
     	if (mNeedsPin && mPin == null && !mPinRequested) {
     		mDialog = enterPinDialog();
+    		mSuspendTokencode = true;
     	}
+    	mBackend.onResume();
     }
 
     @Override
@@ -328,7 +329,7 @@ public class TokencodeFragment extends Fragment
 	@Override
 	public void onTokencodeUpdate(String tokencode, String nextTokencode, int secondsLeft) {
 
-		if (mDialog != null) {
+		if (mSuspendTokencode) {
 			// wait for user entry instead of displaying bogus data
 			tokencode = nextTokencode = "";
 			secondsLeft = 0;

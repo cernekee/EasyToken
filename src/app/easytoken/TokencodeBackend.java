@@ -110,7 +110,6 @@ public class TokencodeBackend extends BroadcastReceiver {
 		if (!pin.equals(info.pin)) {
 			info.pin = pin;
 			info.save();
-			onReceive(null, null);
 		}
 	}
 
