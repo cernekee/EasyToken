@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="input_methods">
-        <item>I have an \'http\' link or \'sdtid\' file attachment in my email.</item>
-        <item>I have a QR barcode.</item>
-        <item>I copied an \'sdtid\' file to my Android device over USB.</item>
-        <item>Manual entry or paste from clipboard.</item>
+    <string-array name="input_methods" translatable="false">
+        <item>@string/input_uri</item>
+        <item>@string/input_qr</item>
+        <item>@string/input_browse</item>
+        <item>@string/input_manual</item>
     </string-array>
 
     <string-array name="input_methods_keys" translatable="false">
