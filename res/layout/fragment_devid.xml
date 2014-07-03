@@ -3,13 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-
+    
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/get_started_text"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
+        android:textStyle="bold"
+        android:text="@string/device_id" />
+    
+    <TextView
+        android:id="@+id/device_id"
+        android:typeface="monospace"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    
     <View
 	    	android:layout_width="match_parent"
 	    	android:layout_height="20dp" />
@@ -21,12 +27,12 @@
 	    android:orientation="horizontal" >
 
         <Button
-	        android:id="@+id/import_button"
+	        android:id="@+id/copy_button"
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
 	        style="?android:attr/buttonBarButtonStyle"
-	        android:text="@string/import_token" />
+	        android:text="@string/copy" />
 
 	    <View
 	    	android:layout_width="1dp"
@@ -34,13 +40,13 @@
 	    	android:background="#808080"/>
 
 	    <Button
-	        android:id="@+id/help_button"
+	        android:id="@+id/email_button"
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
 	        style="?android:attr/buttonBarButtonStyle"
-	        android:text="@string/help" />
+	        android:text="@string/email" />
 
 	</LinearLayout>
-
+    
 </LinearLayout>

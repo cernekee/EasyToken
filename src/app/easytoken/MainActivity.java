@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class MainActivity extends Activity
 		implements GettingStartedFragment.OnImportButtonClickedListener {
@@ -33,6 +34,8 @@ public class MainActivity extends Activity
 
 	private void setupFragment() {
 		Fragment frag;
+		View divider = findViewById(R.id.divider);
+		View frag_1 = findViewById(R.id.frag_1);
 
 		TokenInfo info = TokenInfo.getDefaultToken();
 		if (info != null) {
@@ -41,12 +44,21 @@ public class MainActivity extends Activity
 
 			frag = new TokencodeFragment();
 			frag.setArguments(args);
+
+			divider.setVisibility(View.GONE);
+			frag_1.setVisibility(View.GONE);
 		} else {
 			frag = new GettingStartedFragment();
+
+			getFragmentManager().beginTransaction()
+				.replace(R.id.frag_1, new DevidFragment())
+				.commit();
+			divider.setVisibility(View.VISIBLE);
+			frag_1.setVisibility(View.VISIBLE);
 		}
 
 		getFragmentManager().beginTransaction()
-			.replace(android.R.id.content, frag)
+			.replace(R.id.frag_0, frag)
 			.commit();
 	}
 
@@ -54,6 +66,7 @@ public class MainActivity extends Activity
 	public void onCreate(Bundle b) {
 		super.onCreate(b);
 
+		setContentView(R.layout.activity_main);
 		if (b == null) {
 			setupFragment();
 		}
