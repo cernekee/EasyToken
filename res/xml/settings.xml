@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<CheckBoxPreference
+	    android:defaultValue="true"
+	    android:key="save_pin"
+	    android:title="@string/save_pin_title"
+	    android:summary="@string/save_pin_summary" />
+
+	<CheckBoxPreference
+	    android:defaultValue="false"
+	    android:key="fg_service"
+	    android:title="@string/fg_service_title"
+	    android:summary="@string/fg_service_summary" />
+
+</PreferenceScreen>

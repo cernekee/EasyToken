@@ -85,6 +85,9 @@ public class MainActivity extends Activity
 		case R.id.action_import:
 			onImportButtonClicked();
 			return true;
+		case R.id.action_settings:
+			BareActivity.startWithFrag(this, SettingsFragment.class);
+			return true;
 		case R.id.action_help:
 			BareActivity.startWithLayout(this, R.layout.activity_help);
 			return true;

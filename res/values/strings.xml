@@ -9,6 +9,12 @@
     <string name="import_token">Import token</string>
     <string name="import_new_token">Import new token</string>
 
+    <string name="settings">Settings</string>
+    <string name="save_pin_title">Remember PIN</string>
+    <string name="save_pin_summary">Save the PIN to internal storage. If you want to use widgets, this is required.</string>
+    <string name="fg_service_title">Use foreground service</string>
+    <string name="fg_service_summary">Enable this if you have trouble with the widget freezing. Android will raise the widget\'s priority but may also display an annoying notification.</string>
+
     <string name="help">Help</string>
     <string name="help_text_title">Help</string>
     <string name="help_text_000">Easy Token is an RSA SecurID-compatible authenticator with advanced usability features.\n</string>
