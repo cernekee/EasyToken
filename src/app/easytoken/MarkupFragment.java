@@ -18,6 +18,8 @@
 package app.easytoken;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,6 +90,21 @@ public class MarkupFragment extends Fragment {
 		tv.setMovementMethod(LinkMovementMethod.getInstance());
 	}
 
+	private class KvPair implements Comparable<KvPair> {
+		public String key;
+		public String value;
+
+		public KvPair(String key, String value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public int compareTo(KvPair another) {
+			return key.compareTo(another.key);
+		}
+	};
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -96,23 +113,32 @@ public class MarkupFragment extends Fragment {
 		LinearLayout ll = new LinearLayout(activity);
 		ll.setOrientation(LinearLayout.VERTICAL);
 
-		// fetch R.array.<tag> where <tag> comes from the android:tag element (xml layout)
-		int arrayRes;
+		ArrayList<KvPair> text = new ArrayList<KvPair>();
+
+		// fetch all R.string.<tag>_* strings, where <tag> comes from the android:tag element (xml layout)
 		try {
-			Class<?> res = R.array.class;
-			Field f = res.getDeclaredField(getTag());
-			arrayRes = f.getInt(null);
+			String regex = getTag() + "_\\d+.*";
+			String titleName = getTag() + "_title";
+
+			Class<?> res = R.string.class;
+			for (Field f : res.getDeclaredFields()) {
+				String key = f.getName();
+				if (key.equals(titleName)) {
+					activity.setTitle(f.getInt(null));
+				} else if (key.matches(regex)) {
+					text.add(new KvPair(key, getString(f.getInt(null))));
+				}
+			}
 		} catch (Exception e) {
 			Log.e(TAG, "error finding markup text", e);
 			return ll;
 		}
 
-		String list[] = getResources().getStringArray(arrayRes);
-		activity.setTitle(list[0]);
+		Collections.sort(text);
 
-		for (int i = 1; i < list.length; i++) {
+		for (KvPair kv : text) {
 			TextView tv = new TextView(activity);
-			setHtml(tv, list[i]);
+			setHtml(tv, kv.value);
 			ll.addView(tv);
 		}
 
