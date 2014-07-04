@@ -39,6 +39,8 @@ public class TokenInfo {
 	public int id = -1;
 	public boolean pinRequired;
 
+	public static long lastModified;
+
 	private static SharedPreferences mPrefs;
 	private static boolean mSavePin;
 	private static int mMaxId;
@@ -50,6 +52,7 @@ public class TokenInfo {
 		mSavePin = mPrefs.getBoolean("save_pin", true);
 		mMaxId = mPrefs.getInt("max_id", 0);
 		mDefaultId = mPrefs.getInt("default_id", -1);
+		lastModified = mPrefs.getLong("last_modified", 0);
 
 		/*
 		 * ANDROID_ID is unique, but it is only 64 bits long.  So truncate its SHA1 hash to 12 bytes.
@@ -150,9 +153,15 @@ public class TokenInfo {
 		this(lib, pin, lib.getInfo().serial);
 	}
 
+	private static void updateLastModified() {
+		lastModified = System.currentTimeMillis();
+		mPrefs.edit().putLong("last_modified", lastModified).commit();
+	}
+
 	public void makeDefault() {
 		mDefaultId = id;
 		mPrefs.edit().putInt("default_id", id).commit();
+		updateLastModified();
 	}
 
 	public void delete() {
@@ -177,12 +186,25 @@ public class TokenInfo {
 			.putInt("max_id", newMax)
 			.putInt("default_id", newDefault)
 			.commit();
+		updateLastModified();
 
 		mMaxId = newMax;
 		mDefaultId = newDefault;
 	}
 
+	/* returns true if changed, false otherwise */
+	private boolean writePrefString(Editor ed, String key, String value) {
+		String old = mPrefs.getString(key, null);
+		if (value.equals(old)) {
+			return false;
+		}
+		ed.putString(key, value);
+		return true;
+	}
+
 	public int save() {
+		boolean changed = false;
+
 		if (id == -1) {
 			/* find the next free slot */
 			for (id = 0; id <= mMaxId; id++) {
@@ -192,19 +214,23 @@ public class TokenInfo {
 			}
 			if (mMaxId < id) {
 				mMaxId = id;
+				changed = true;
 			}
 		}
 
-		Editor ed = mPrefs.edit()
-			.putString("token_str_" + id, lib.encryptSeed(null, null))
+		Editor ed = mPrefs.edit();
 
-			.putString("token_name_" + id, name)
-			.putInt("max_id", mMaxId);
+		changed |= writePrefString(ed, "token_str_" + id, lib.encryptSeed(null, null));
+		changed |= writePrefString(ed, "token_name_" + id, name);
 
 		if (mSavePin) {
-			ed.putString("token_pin_" + id, pin);
+			changed |= writePrefString(ed, "token_pin_" + id, pin);
 		}
 		ed.commit();
+
+		if (changed) {
+			updateLastModified();
+		}
 
 		if (getDefaultToken() == null) {
 			makeDefault();
@@ -216,6 +242,7 @@ public class TokenInfo {
 	public static void setSavePin(boolean val) {
 		mSavePin = val;
 		if (mSavePin == true) {
+			updateLastModified();
 			return;
 		}
 
@@ -225,6 +252,7 @@ public class TokenInfo {
 			ed.remove("token_pin_" + id);
 		}
 		ed.commit();
+		updateLastModified();
 	}
 
 	public boolean isPinMissing() {
