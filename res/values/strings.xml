@@ -8,7 +8,22 @@
     <string name="get_started_text">To get started, please choose one of the following options:</string>
     <string name="import_token">Import token</string>
     <string name="import_new_token">Import new token</string>
+
     <string name="help">Help</string>
+    <string name="help_0">Easy Token is an RSA SecurID-compatible authenticator with advanced usability features.\n</string>
+    <string name="help_1">If you do not have an RSA software token or are not sure what this is used for, you may safely uninstall the app.\n</string>
+    <string name="help_2">Easy Token supports both lock screen widgets and home screen widgets.  First import your token, then enter your PIN.  Then follow these instructions to install the widget:\n</string>
+    <string name="help_3"> - Lock screen widget: available on Android 4.2 and higher.  Watch [this video](http://www.youtube.com/watch?v=ZpN8Wyu_z6Y) and [this video](http://www.youtube.com/watch?v=NRRbjlXQluc) for an introduction.</string>
+    <string name="help_4"> - See also: special instructions for [Samsung](http://www.youtube.com/watch?v=Fbzcy7NxBuE) and [HTC](http://www.youtube.com/watch?v=QZZjBuqQvZk).  If the standard instructions do not work, you may need to search for directions for your specific device.</string>
+    <string name="help_5"> - Home screen widget: for Android 4.3 or earlier watch [this video](http://www.youtube.com/watch?v=mihmN_mZU4c); for Android 4.4+ watch [this video](http://www.youtube.com/watch?v=q_xKlp7ehnY).</string>
+    <string name="help_6">\nTips:\n</string>
+    <string name="help_7"> - To resize a home screen widget, long-press the widget and then release.  Then drag the outline to adjust the boundaries.</string>
+    <string name="help_8"> - Some Android versions miscalculate the widget\'s size, resulting in a distorted image.  If this happens, delete the widget and re-create it.</string>
+    <string name="help_9"> - You may delete the clock widget from the lock screen and place Easy Token on the main lock screen, if desired.</string>
+    <string name="help_10">\nSecurity considerations:\n</string>
+    <string name="help_11">Please use Easy Token responsibly and avoid taking unnecessary risks with sensitive data.  All software tokens are at risk of theft by malware; for high-security applications a hardware token is strongly encouraged.\n</string>
+    <string name="help_12">Saving your PIN is convenient, but can be risky if your device is stolen.\n</string>
+    <string name="help_13">If you use the lock screen widget, your tokencode is available to anybody with access to your phone (even if they cannot unlock it).  For this case, you may want to ask your system administrator to issue a 6-digit PIN-less software token, which will require you to enter PIN + TOKENCODE when logging in, instead of just a tokencode.</string>
 
     <string name="about">About</string>
     <string name="about_0" translatable="false">{pkg-info}\n</string>
