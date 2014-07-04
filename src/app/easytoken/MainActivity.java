@@ -30,13 +30,16 @@ public class MainActivity extends Activity
 
 	public static final String TAG = "EasyToken";
 
-	private static final int REQ_IMPORT = 1;
+	private static final String EXTRA_LAST_MODIFIED = "app.easytoken.last_modified";
+
+	private long mLastModified;
 
 	private void setupFragment() {
 		Fragment frag;
 		View divider = findViewById(R.id.divider);
 		View frag_1 = findViewById(R.id.frag_1);
 
+		mLastModified = TokenInfo.lastModified;
 		TokenInfo info = TokenInfo.getDefaultToken();
 		if (info != null) {
 			Bundle args = new Bundle();
@@ -68,6 +71,23 @@ public class MainActivity extends Activity
 
 		setContentView(R.layout.activity_main);
 		if (b == null) {
+			setupFragment();
+		} else {
+			mLastModified = b.getLong(EXTRA_LAST_MODIFIED);
+		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle b) {
+		super.onSaveInstanceState(b);
+		b.putLong(EXTRA_LAST_MODIFIED, mLastModified);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		if (TokenInfo.lastModified != mLastModified) {
 			setupFragment();
 		}
 	}
@@ -103,16 +123,6 @@ public class MainActivity extends Activity
 	public void onImportButtonClicked() {
 		// clicking either "Import new token" from the menu, or "Import token" from
 		// GettingStartedFragment, will end up here
-		startActivityForResult(new Intent(this, ImportActivity.class), REQ_IMPORT);
-	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		super.onActivityResult(requestCode, resultCode, intent);
-
-		if (requestCode == REQ_IMPORT) {
-			// (re)create TokencodeFragment if a new token was imported
-			setupFragment();
-		}
+		startActivity(new Intent(this, ImportActivity.class));
 	}
 }
