@@ -31,13 +31,20 @@ public class MainActivity extends Activity
 	public static final String TAG = "EasyToken";
 
 	private static final String EXTRA_LAST_MODIFIED = "app.easytoken.last_modified";
+	private static final String EXTRA_TOKEN_PRESENT = "app.easytoken.token_present";
 
 	private long mLastModified;
+	private boolean mTokenPresent;
+
+	private void updateVisibility() {
+		int vis = mTokenPresent ? View.GONE : View.VISIBLE;
+
+		findViewById(R.id.divider).setVisibility(vis);
+		findViewById(R.id.frag_1).setVisibility(vis);
+	}
 
 	private void setupFragment() {
 		Fragment frag;
-		View divider = findViewById(R.id.divider);
-		View frag_1 = findViewById(R.id.frag_1);
 
 		mLastModified = TokenInfo.lastModified;
 		TokenInfo info = TokenInfo.getDefaultToken();
@@ -48,16 +55,17 @@ public class MainActivity extends Activity
 			frag = new TokencodeFragment();
 			frag.setArguments(args);
 
-			divider.setVisibility(View.GONE);
-			frag_1.setVisibility(View.GONE);
+			mTokenPresent = true;
+			updateVisibility();
 		} else {
 			frag = new GettingStartedFragment();
 
 			getFragmentManager().beginTransaction()
 				.replace(R.id.frag_1, new DevidFragment())
 				.commit();
-			divider.setVisibility(View.VISIBLE);
-			frag_1.setVisibility(View.VISIBLE);
+
+			mTokenPresent = true;
+			updateVisibility();
 		}
 
 		getFragmentManager().beginTransaction()
@@ -74,6 +82,8 @@ public class MainActivity extends Activity
 			setupFragment();
 		} else {
 			mLastModified = b.getLong(EXTRA_LAST_MODIFIED);
+			mTokenPresent = b.getBoolean(EXTRA_TOKEN_PRESENT);
+			updateVisibility();
 		}
 	}
 
@@ -81,6 +91,7 @@ public class MainActivity extends Activity
 	protected void onSaveInstanceState(Bundle b) {
 		super.onSaveInstanceState(b);
 		b.putLong(EXTRA_LAST_MODIFIED, mLastModified);
+		b.putBoolean(EXTRA_TOKEN_PRESENT, mTokenPresent);
 	}
 
 	@Override
