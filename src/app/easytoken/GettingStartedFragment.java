@@ -50,7 +50,7 @@ public class GettingStartedFragment extends Fragment {
 		button.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				FragActivity.start(act, HelpFragment.class);
+				BareActivity.startWithLayout(act, R.layout.activity_help);
 			}
 		});
 	}

@@ -26,10 +26,6 @@
         </activity>
 
         <activity
-            android:name=".FragActivity" >
-        </activity>
-
-        <activity
             android:name=".BareActivity" >
         </activity>
 

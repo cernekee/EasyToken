@@ -86,7 +86,7 @@ public class MainActivity extends Activity
 			onImportButtonClicked();
 			return true;
 		case R.id.action_help:
-			FragActivity.start(this, HelpFragment.class);
+			BareActivity.startWithLayout(this, R.layout.activity_help);
 			return true;
 		case R.id.action_about:
 			BareActivity.startWithLayout(this, R.layout.activity_about);
