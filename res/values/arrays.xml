@@ -15,4 +15,13 @@
         <item>manual</item>
     </string-array>
 
+    <string-array name="about_text" translatable="false">
+        <item>@string/about</item>
+        <item>@string/about_0</item>
+        <item>@string/about_1</item>
+        <item>@string/about_2</item>
+        <item>@string/about_3</item>
+        <item>@string/about_4</item>
+    </string-array>
+
 </resources>

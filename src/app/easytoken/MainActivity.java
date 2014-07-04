@@ -89,7 +89,7 @@ public class MainActivity extends Activity
 			FragActivity.start(this, HelpFragment.class);
 			return true;
 		case R.id.action_about:
-			FragActivity.start(this, AboutFragment.class);
+			BareActivity.startWithLayout(this, R.layout.activity_about);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

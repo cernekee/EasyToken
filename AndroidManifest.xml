@@ -30,6 +30,10 @@
         </activity>
 
         <activity
+            android:name=".BareActivity" >
+        </activity>
+
+        <activity
             android:name="de.blinkt.openvpn.FileSelect" >
         </activity>
 
