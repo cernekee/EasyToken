@@ -171,7 +171,8 @@ public class TokencodeWidgetService extends Service
 	        views.setViewPadding(R.id.box, padding, padding, padding, padding);
 
 	        Intent intent = new Intent(mContext, MainActivity.class);
-	        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+	        intent.setAction(Intent.ACTION_MAIN);
+	        intent.addCategory(Intent.CATEGORY_LAUNCHER);
 	        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
 	        views.setOnClickPendingIntent(R.id.box, pi);
 
