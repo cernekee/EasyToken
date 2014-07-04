@@ -162,7 +162,7 @@ public class TokencodeFragment extends Fragment
 			}
 		}
 		// depends on mView from populateView()
-		setPin(mPin);
+		setupPinUI(mPin);
 
     	return v;
     }
@@ -179,7 +179,7 @@ public class TokencodeFragment extends Fragment
     	super.onDestroy();
     }
 
-    private void setPin(String s) {
+    private void setupPinUI(String s) {
     	int res;
     	boolean warn = false;
 
@@ -188,13 +188,9 @@ public class TokencodeFragment extends Fragment
 			res = R.string.not_required;
 		} else if (s == null) {
 			mPin = null;
-			mBackend.info.pin = "";
-			mBackend.info.save();
 			warn = true;
 			res = R.string.no;
 		} else {
-			mBackend.info.pin = s;
-			mBackend.info.save();
 			res = R.string.yes;
 		}
 
@@ -203,7 +199,13 @@ public class TokencodeFragment extends Fragment
 
     private void finishPinDialog(String pin) {
     	mSuspendTokencode = false;
-    	setPin(pin);
+    	setupPinUI(pin);
+
+    	if (mNeedsPin) {
+    		mBackend.info.pin = (pin == null) ? "" : pin;
+    		mBackend.info.save();
+    	}
+
     	mPinRequested = true;
     	mBackend.updateNow();
     }
