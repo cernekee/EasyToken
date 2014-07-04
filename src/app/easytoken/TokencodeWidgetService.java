@@ -17,19 +17,29 @@
 
 package app.easytoken;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.RemoteViews;
 
 public class TokencodeWidgetService extends Service
@@ -40,8 +50,10 @@ public class TokencodeWidgetService extends Service
 	private static final String PFX = "app.easytoken.";
 	private static final String ACTION_KICK = PFX + "kick";
 	private static final String ACTION_RESTART = PFX + "restart";
+	private static final String ACTION_TOGGLE_CLOCK = PFX + "toggle_clock";
 
 	private static boolean mFgPref;
+	private boolean mClockMode;
 
 	private boolean mIsForeground;
 	private TokencodeBackend mBackend;
@@ -90,14 +102,20 @@ public class TokencodeWidgetService extends Service
 
 		TokenInfo t = TokenInfo.getDefaultToken();
 		if (t == null) {
+			mTokencode = "NO TOKEN";
 			return false;
 		}
 
 		mBackend = new TokencodeBackend();
 		mBackend.init(mContext.getApplicationContext(), this, t.id);
+
+		if (mBackend.info.isPinMissing()) {
+			mTokencode = "NO PIN";
+			return false;
+		}
+
 		mInterval = mBackend.info.lib.getInfo().interval;
 		mBackend.onResume();
-
 		return true;
 	}
 
@@ -108,22 +126,17 @@ public class TokencodeWidgetService extends Service
 			mContext = getApplicationContext();
 			mComponent = new ComponentName(mContext, TokencodeWidget.class);
 			mInitDone = true;
-			mError = false;
 
-			if (startBackend() == false) {
-				mTokencode = "NO TOKEN";
-				mError = true;
-			} else if (mBackend.info.isPinMissing()) {
-				mTokencode = "NO PIN";
-				mError = true;
+			mError = !startBackend();
+			if (mError) {
+				stopBackend();
+				mSecondsLeft = mInterval = 60;
+				updateWidgets();
+				stopSelf();
 			}
-		}
-
-		if (mError) {
-			stopBackend();
-			mSecondsLeft = mInterval = 60;
+		} else if (ACTION_TOGGLE_CLOCK.equals(action)) {
+			mClockMode = !mClockMode;
 			updateWidgets();
-			stopSelf();
 		}
 
 		return START_STICKY;
@@ -151,7 +164,68 @@ public class TokencodeWidgetService extends Service
         return fontSizePx * widgetWidthPx / typWidthPx;
 	}
 
-	private int updateWidgets() {
+	private void updateTokencode(RemoteViews views, Bundle options) {
+    	int padding = (int)scaleView(options, R.dimen.widget_typical_padding);
+    	views.setViewPadding(R.id.box, padding, padding, padding, padding);
+
+        views.setTextViewTextSize(R.id.tokencode, TypedValue.COMPLEX_UNIT_PX,
+        		scaleView(options, R.dimen.widget_typical_tokencode_fontsize));
+
+        views.setViewVisibility(R.id.progress_bar, mError ? View.GONE : View.VISIBLE);
+        views.setViewVisibility(R.id.date, View.GONE);
+
+        views.setTextViewText(R.id.tokencode, mTokencode);
+        views.setProgressBar(R.id.progress_bar, mInterval - 1, mSecondsLeft - 1, false);
+	}
+
+	private void updateClock(RemoteViews views, Bundle options) {
+    	int padding = (int)scaleView(options, R.dimen.widget_typical_padding);
+    	views.setViewPadding(R.id.box, padding, padding, padding, padding);
+
+        views.setTextViewTextSize(R.id.tokencode, TypedValue.COMPLEX_UNIT_PX,
+        		scaleView(options, R.dimen.widget_typical_time_fontsize));
+        views.setTextViewTextSize(R.id.date, TypedValue.COMPLEX_UNIT_PX,
+        		scaleView(options, R.dimen.widget_typical_date_fontsize));
+
+        views.setViewVisibility(R.id.progress_bar, View.GONE);
+        views.setViewVisibility(R.id.date, View.VISIBLE);
+
+        Date now = Calendar.getInstance().getTime();
+        DateFormat dfTime = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+        DateFormat dfDate = DateFormat.getDateInstance(DateFormat.MEDIUM);
+        String weekday = new SimpleDateFormat("EEEE", Locale.getDefault()).format(now);
+
+        views.setTextViewText(R.id.tokencode, dfTime.format(now));
+        views.setTextViewText(R.id.date, weekday + ", " + dfDate.format(now));
+	}
+
+	private void updateLockScreenWidget(RemoteViews views, Bundle options) {
+		if (mClockMode && !mError) {
+			updateClock(views, options);
+		} else {
+			updateTokencode(views, options);
+		}
+
+		Intent intent = new Intent(mContext, TokencodeWidgetService.class);
+		intent.setAction(ACTION_TOGGLE_CLOCK);
+
+        PendingIntent pi = PendingIntent.getService(mContext, 0, intent, 0);
+        views.setOnClickPendingIntent(R.id.box, pi);
+	}
+
+	private void updateNormalWidget(RemoteViews views, Bundle options) {
+		updateTokencode(views, options);
+
+        Intent intent = new Intent(mContext, MainActivity.class);
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+        views.setOnClickPendingIntent(R.id.box, pi);
+	}
+
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private int updateWidgets() {
 		AppWidgetManager mgr = AppWidgetManager.getInstance(mContext);
 		final int ids[] = mgr.getAppWidgetIds(mComponent);
 		final int N = ids.length;
@@ -162,19 +236,12 @@ public class TokencodeWidgetService extends Service
 	        RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget);
 	        Bundle options = mgr.getAppWidgetOptions(id);
 
-	        views.setTextViewText(R.id.tokencode, mTokencode);
-	        views.setTextViewTextSize(R.id.tokencode, TypedValue.COMPLEX_UNIT_PX,
-	        		scaleView(options, R.dimen.widget_typical_fontsize));
-
-	        views.setProgressBar(R.id.progress_bar, mInterval - 1, mSecondsLeft - 1, false);
-	        int padding = (int)scaleView(options, R.dimen.widget_typical_padding);
-	        views.setViewPadding(R.id.box, padding, padding, padding, padding);
-
-	        Intent intent = new Intent(mContext, MainActivity.class);
-	        intent.setAction(Intent.ACTION_MAIN);
-	        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-	        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
-	        views.setOnClickPendingIntent(R.id.box, pi);
+	        int category = options.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1);
+	        if (category == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD) {
+	        	updateLockScreenWidget(views, options);
+	        } else {
+	        	updateNormalWidget(views, options);
+	        }
 
 			mgr.updateAppWidget(id, views);
 		}
