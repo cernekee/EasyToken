@@ -138,14 +138,15 @@ public class ImportActivity extends Activity
 		String path = uri.getPath();
 		boolean isFile = false;
 
-		if ("file".equals(uri.getScheme()) && path != null) {
+		if (path != null &&
+			("file".equals(uri.getScheme()) || "content".equals(uri.getScheme()))) {
 			/*
 			 * Arguably we shouldn't take file:// URIs from QR codes,
 			 * and maybe we should be more careful about what we accept
 			 * from other apps too
 			 */
 			isFile = true;
-			data = Misc.readStringFromFile(path);
+			data = Misc.readStringFromUri(this, uri);
 			if (data == null) {
 				showError(ImportInstructionsFragment.INST_FILE_ERROR, path);
 				return null;

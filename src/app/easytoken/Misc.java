@@ -20,10 +20,14 @@ package app.easytoken;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Scanner;
 
+import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 public class Misc {
@@ -54,6 +58,21 @@ public class Misc {
 			return readAndClose(reader);
 		} catch (IOException e) {
 			Log.e(TAG, "Misc: readStringFromFile exception", e);
+		}
+		return null;
+	}
+
+	public static String readStringFromUri(Context context, Uri uri) {
+		try {
+			InputStream fs = context.getContentResolver().openInputStream(uri);
+			Scanner s = new Scanner(fs);
+			s.useDelimiter("\\A");
+			String str = s.hasNext() ? s.next() : "";
+			s.close();
+			fs.close();
+			return str;
+		} catch (Exception e) {
+			Log.e(TAG, "error reading from content provider", e);
 		}
 		return null;
 	}
