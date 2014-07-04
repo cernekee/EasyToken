@@ -41,6 +41,7 @@ public class TokenInfo {
 
 	public static long lastModified;
 
+	private static Context mContext;
 	private static SharedPreferences mPrefs;
 	private static boolean mSavePin;
 	private static int mMaxId;
@@ -48,6 +49,7 @@ public class TokenInfo {
 	private static String mDeviceId;
 
 	public static void init(Context context) {
+		mContext = context.getApplicationContext();
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		mSavePin = mPrefs.getBoolean("save_pin", true);
 		mMaxId = mPrefs.getInt("max_id", 0);
@@ -156,6 +158,7 @@ public class TokenInfo {
 	private static void updateLastModified() {
 		lastModified = System.currentTimeMillis();
 		mPrefs.edit().putLong("last_modified", lastModified).commit();
+		TokencodeWidgetService.restart(mContext);
 	}
 
 	public void makeDefault() {

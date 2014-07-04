@@ -206,7 +206,6 @@ public class TokencodeFragment extends Fragment
     	setPin(pin);
     	mPinRequested = true;
     	mBackend.updateNow();
-    	TokencodeWidgetService.restart(getActivity());
     }
 
     private void setupTextWatcher(AlertDialog d, final TextView tv) {
