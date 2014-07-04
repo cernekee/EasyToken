@@ -18,13 +18,24 @@
 package app.easytoken;
 
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 
 public class SettingsFragment extends PreferenceFragment {
 
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		addPreferencesFromResource(R.xml.settings);
+
+		findPreference("save_pin").setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				TokenInfo.setSavePin((Boolean)newValue);
+				return true;
+			}
+		});
 	}
 }

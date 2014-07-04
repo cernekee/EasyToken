@@ -24,6 +24,7 @@ import org.stoken.LibStoken;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 import android.util.Log;
@@ -39,12 +40,14 @@ public class TokenInfo {
 	public boolean pinRequired;
 
 	private static SharedPreferences mPrefs;
+	private static boolean mSavePin;
 	private static int mMaxId;
 	private static int mDefaultId;
 	private static String mDeviceId;
 
 	public static void init(Context context) {
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		mSavePin = mPrefs.getBoolean("save_pin", true);
 		mMaxId = mPrefs.getInt("max_id", 0);
 		mDefaultId = mPrefs.getInt("default_id", -1);
 
@@ -192,18 +195,36 @@ public class TokenInfo {
 			}
 		}
 
-		mPrefs.edit()
+		Editor ed = mPrefs.edit()
 			.putString("token_str_" + id, lib.encryptSeed(null, null))
-			.putString("token_pin_" + id, pin)
+
 			.putString("token_name_" + id, name)
-			.putInt("max_id", mMaxId)
-			.commit();
+			.putInt("max_id", mMaxId);
+
+		if (mSavePin) {
+			ed.putString("token_pin_" + id, pin);
+		}
+		ed.commit();
 
 		if (getDefaultToken() == null) {
 			makeDefault();
 		}
 
 		return id;
+	}
+
+	public static void setSavePin(boolean val) {
+		mSavePin = val;
+		if (mSavePin == true) {
+			return;
+		}
+
+		/* on deselection, clear all saved PINs */
+		Editor ed = mPrefs.edit();
+		for (int id = 0; id <= mMaxId; id++) {
+			ed.remove("token_pin_" + id);
+		}
+		ed.commit();
 	}
 
 	public boolean isPinMissing() {
