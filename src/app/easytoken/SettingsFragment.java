@@ -37,5 +37,13 @@ public class SettingsFragment extends PreferenceFragment {
 				return true;
 			}
 		});
+
+		findPreference("fg_service").setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				TokencodeWidgetService.setFgService((Boolean)newValue);
+				return true;
+			}
+		});
 	}
 }

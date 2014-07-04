@@ -17,15 +17,18 @@
 
 package app.easytoken;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.widget.RemoteViews;
 
@@ -38,6 +41,9 @@ public class TokencodeWidgetService extends Service
 	private static final String ACTION_KICK = PFX + "kick";
 	private static final String ACTION_RESTART = PFX + "restart";
 
+	private static boolean mFgPref;
+
+	private boolean mIsForeground;
 	private TokencodeBackend mBackend;
 
 	private boolean mError;
@@ -49,6 +55,12 @@ public class TokencodeWidgetService extends Service
 	private Context mContext;
 	private ComponentName mComponent;
 
+	public static void init(Context context) {
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+		mFgPref = sp.getBoolean("fg_service", false);
+		kick(context);
+	}
+
 	public static void kick(Context context) {
 		Intent i = new Intent(context, TokencodeWidgetService.class);
 		i.setAction(ACTION_KICK);
@@ -59,6 +71,10 @@ public class TokencodeWidgetService extends Service
 		Intent i = new Intent(context, TokencodeWidgetService.class);
 		i.setAction(ACTION_RESTART);
 		context.startService(i);
+	}
+
+	public static void setFgService(boolean val) {
+		mFgPref = val;
 	}
 
 	private void stopBackend() {
@@ -162,6 +178,14 @@ public class TokencodeWidgetService extends Service
 			mgr.updateAppWidget(id, views);
 		}
 
+		if (!mIsForeground && mFgPref) {
+			Notification note = new Notification.Builder(mContext).build();
+			startForeground(1, note);
+		} else if (mIsForeground && !mFgPref) {
+			stopForeground(true);
+		}
+		mIsForeground = mFgPref;
+
 		return N;
 	}
 
@@ -172,6 +196,9 @@ public class TokencodeWidgetService extends Service
 
 		if (updateWidgets() == 0) {
 			stopBackend();
+			if (mIsForeground) {
+				stopForeground(true);
+			}
 			stopSelf();
 		}
 	}
