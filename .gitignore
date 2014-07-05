@@ -2,4 +2,6 @@ bin/
 gen/
 libs/
 
+local.properties
+
 .*.sw*
