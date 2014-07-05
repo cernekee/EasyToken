@@ -1,6 +1,8 @@
 bin/
 gen/
-libs/
+
+libs/*/*.so
+libs/stoken-wrapper.jar
 
 local.properties
 
