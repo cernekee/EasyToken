@@ -1,8 +1,8 @@
 Easy Token
 ==========
 
-Easy Token is an RSA SecurID-compatible software authenticator with
-advanced usability features:
+Easy Token is an RSA SecurID-compatible software authenticator for Android
+with advanced usability features:
 
 * Convenient lock screen and home screen widgets provide instant tokencodes
 without navigating to an app.
@@ -11,9 +11,20 @@ without navigating to an app.
 and QR tokens.
 * 100% open source: https://github.com/cernekee/EasyToken
 
+## Downloads
+
+Official releases are posted in the
+[XDA thread](http://forum.xda-developers.com/android/apps-games/app-easy-token-source-securid-token-t2805507)
+and on
+[Google Play](https://play.google.com/store/apps/details?id=app.easytoken).
+
+No registration is required to download from XDA.
+
 ## Support
 
-To report issues, please email the author at [cernekee@gmail.com](mailto:cernekee+et@gmail.com).
+To report issues, please email the author at
+[cernekee@gmail.com](mailto:cernekee+et@gmail.com) or post in the
+[XDA thread](http://forum.xda-developers.com/android/apps-games/app-easy-token-source-securid-token-t2805507).
 
 ## Building from source
 
