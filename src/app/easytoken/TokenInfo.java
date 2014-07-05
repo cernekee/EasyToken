@@ -229,6 +229,7 @@ public class TokenInfo {
 		if (mSavePin) {
 			changed |= writePrefString(ed, "token_pin_" + id, pin);
 		}
+		ed.putInt("max_id", mMaxId);
 		ed.commit();
 
 		if (changed) {
