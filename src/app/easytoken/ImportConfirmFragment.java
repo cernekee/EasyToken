@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class ImportConfirmFragment extends Fragment {
@@ -69,12 +70,27 @@ public class ImportConfirmFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle b) {
 		View v = inflater.inflate(R.layout.fragment_import_confirm, container, false);
 
+		TextView confirmView = (TextView)v.findViewById(R.id.confirm_text);
+		LinearLayout oldContainer = (LinearLayout)v.findViewById(R.id.old_token_container);
+
 		Bundle args = getArguments();
 
-		populateTokenInfo(v, args.getString(ARG_OLD_TOKEN), R.string.current_token,
-				R.id.old_token_sn, R.id.old_token_exp_date);
-		populateTokenInfo(v, args.getString(ARG_NEW_TOKEN), R.string.replacement_token,
-				R.id.new_token_sn, R.id.new_token_exp_date);
+		String oldToken = args.getString(ARG_OLD_TOKEN);
+		String newToken = args.getString(ARG_NEW_TOKEN);
+
+		if (oldToken != null) {
+			populateTokenInfo(v, oldToken, R.string.current_token,
+					R.id.old_token_sn, R.id.old_token_exp_date);
+			populateTokenInfo(v, newToken, R.string.replacement_token,
+					R.id.new_token_sn, R.id.new_token_exp_date);
+			oldContainer.setVisibility(View.VISIBLE);
+			confirmView.setText(R.string.overwrite_confirm);
+		} else {
+			populateTokenInfo(v, newToken, R.string.token_sn,
+					R.id.new_token_sn, R.id.new_token_exp_date);
+			oldContainer.setVisibility(View.GONE);
+			confirmView.setText(R.string.import_confirm);
+		}
 
         Button button = (Button)v.findViewById(R.id.yes_button);
         button.setOnClickListener(new OnClickListener() {

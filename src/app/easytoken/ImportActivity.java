@@ -53,7 +53,7 @@ public class ImportActivity extends Activity
 	private static final int STEP_MANUAL_ENTRY = 4;
 	private static final int STEP_ERROR = 5;
 	private static final int STEP_UNLOCK_TOKEN = 6;
-	private static final int STEP_CONFIRM_OVERWRITE = 7;
+	private static final int STEP_CONFIRM_IMPORT = 7;
 	private static final int STEP_DONE = 8;
 
 	private static final int REQ_SCAN_QR = IntentIntegrator.REQUEST_CODE;
@@ -176,17 +176,6 @@ public class ImportActivity extends Activity
 		info.save();
 	}
 
-	private void unlockDone(LibStoken lib) {
-		mUri = lib.encryptSeed(null, null);
-
-		if (TokenInfo.getDefaultToken() != null) {
-			mStep = STEP_CONFIRM_OVERWRITE;
-		} else {
-			writeNewToken(lib);
-			mStep = STEP_DONE;
-		}
-	}
-
 	private void handleImportStep() {
 		Fragment f;
 		boolean animate = true;
@@ -222,8 +211,8 @@ public class ImportActivity extends Activity
 					showError(ImportInstructionsFragment.INST_BAD_TOKEN, mUri);
 					return;
 				}
-				/* advances mStep to either STEP_DONE or STEP_CONFIRM_OVERWRITE */
-				unlockDone(lib);
+				mUri = lib.encryptSeed(null, null);
+				mStep = STEP_CONFIRM_IMPORT;
 			}
 			lib.destroy();
 			handleImportStep();
@@ -258,7 +247,7 @@ public class ImportActivity extends Activity
 			showFrag(f, animate);
 
 			lib.destroy();
-		} else if (mStep == STEP_CONFIRM_OVERWRITE) {
+		} else if (mStep == STEP_CONFIRM_IMPORT) {
 			LibStoken lib = importToken(mUri, true);
 			if (lib == null) {
 				/* mStep has already been advanced to an error state */
@@ -267,8 +256,12 @@ public class ImportActivity extends Activity
 
 			Bundle b = new Bundle();
 			b.putString(ImportConfirmFragment.ARG_NEW_TOKEN, mUri);
-			b.putString(ImportConfirmFragment.ARG_OLD_TOKEN,
-					TokenInfo.getDefaultToken().lib.encryptSeed(null, null));
+
+			TokenInfo oldToken = TokenInfo.getDefaultToken();
+			if (oldToken != null) {
+				b.putString(ImportConfirmFragment.ARG_OLD_TOKEN,
+						oldToken.lib.encryptSeed(null, null));
+			}
 
 			f = new ImportConfirmFragment();
 			f.setArguments(b);
@@ -371,7 +364,8 @@ public class ImportActivity extends Activity
 			return;
 		}
 
-		unlockDone(lib);
+		mUri = lib.encryptSeed(null, null);
+		mStep = STEP_CONFIRM_IMPORT;
 		handleImportStep();
 		lib.destroy();
 	}
