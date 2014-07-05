@@ -1,3 +1,11 @@
+v0.81 - UNRELEASED
+
+ - Fix bug in lock screen widget where it would "bounce" between the tokencode
+   display and the clock display for no apparent reason
+
+ - Show the "confirm import" screen unconditionally, so there is a clear
+   indication that email import succeeded
+
 v0.80 - 2014/07/05
 
  - Initial public release
