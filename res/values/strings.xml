@@ -22,7 +22,7 @@
     <string name="help_text_000">Easy Token is an RSA SecurID-compatible authenticator with advanced usability features.\n</string>
     <string name="help_text_010">If you do not have an RSA software token or are not sure what this is used for, you may safely uninstall the app.\n</string>
     <string name="help_text_020">Easy Token supports both lock screen widgets and home screen widgets.  First import your token, then enter your PIN.  Then follow these instructions to install the widget:\n</string>
-    <string name="help_text_030"> - Lock screen widget: available on Android 4.2 and higher.  Watch [this video](http://www.youtube.com/watch?v=ZpN8Wyu_z6Y) and [this video](http://www.youtube.com/watch?v=NRRbjlXQluc) for an introduction.</string>
+    <string name="help_text_030"> - Lock screen widget: available on Android 4.2 through 4.4.  Not available on Android \"L\".  Watch [this video](http://www.youtube.com/watch?v=ZpN8Wyu_z6Y) and [this video](http://www.youtube.com/watch?v=NRRbjlXQluc) for an introduction.</string>
     <string name="help_text_040"> - See also: special instructions for [Samsung](http://www.youtube.com/watch?v=Fbzcy7NxBuE) and [HTC](http://www.youtube.com/watch?v=QZZjBuqQvZk).  If the standard instructions do not work, you may need to search for directions for your specific device.</string>
     <string name="help_text_050"> - Home screen widget: for Android 4.3 or earlier watch [this video](http://www.youtube.com/watch?v=mihmN_mZU4c); for Android 4.4+ watch [this video](http://www.youtube.com/watch?v=q_xKlp7ehnY).</string>
     <string name="help_text_060">\nTips:\n</string>
