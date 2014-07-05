@@ -64,7 +64,7 @@ public class MainActivity extends Activity
 				.replace(R.id.frag_1, new DevidFragment())
 				.commit();
 
-			mTokenPresent = true;
+			mTokenPresent = false;
 			updateVisibility();
 		}
 
