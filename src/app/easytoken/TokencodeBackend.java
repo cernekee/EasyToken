@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.PowerManager;
 
 public class TokencodeBackend extends BroadcastReceiver {
 
@@ -47,7 +48,7 @@ public class TokencodeBackend extends BroadcastReceiver {
 	private String mTokencode;
 	private String mNextTokencode;
 
-	private boolean mScreenOn = true;
+	private boolean mScreenOn;
 
 	public interface OnTokencodeUpdateListener {
 		/* Strings are unformatted.  secondsLeft ranges from 1..30 or 1..60 */
@@ -97,6 +98,9 @@ public class TokencodeBackend extends BroadcastReceiver {
 		};
 
 		stokenInfo = info.lib.getInfo();
+
+		PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+		mScreenOn = pm.isScreenOn();
 
 		IntentFilter filt = new IntentFilter();
 		filt.addAction(Intent.ACTION_SCREEN_OFF);
