@@ -17,6 +17,9 @@
 
 package app.easytoken;
 
+import org.acra.ACRA;
+import org.acra.ACRAConfiguration;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -110,6 +113,19 @@ public class MainActivity extends Activity
 		return true;
 	}
 
+	private void sendProblemReport() {
+		ACRAConfiguration cfg = ACRA.getConfig();
+		cfg.setResDialogText(R.string.problem_dialog_text);
+		cfg.setResDialogCommentPrompt(R.string.problem_dialog_comment_prompt);
+		ACRA.setConfig(cfg);
+		ACRA.getErrorReporter().handleException(null);
+
+		// FIXME: we really want to restore the default strings after the report dialog
+		// is finished, but changing them here would override the problem_dialog_* strings
+		// set above.
+		//ACRA.setConfig(ACRA.getNewDefaultConfig((Application)getApplicationContext()));
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -118,6 +134,9 @@ public class MainActivity extends Activity
 			return true;
 		case R.id.action_settings:
 			BareActivity.startWithFrag(this, SettingsFragment.class);
+			return true;
+		case R.id.action_report_problem:
+			sendProblemReport();
 			return true;
 		case R.id.action_help:
 			BareActivity.startWithLayout(this, R.layout.activity_help);
