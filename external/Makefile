@@ -67,10 +67,17 @@ distclean: clean
 
 #####################################################################
 # Toolchain
+#
+# (The fallback logic is because NDK versions <= r8e can fail after
+# trying to use 32-bit binaries on a 64-bit NDK installation.)
+#
 #####################################################################
 
 $(ARCH_TOOLCHAIN_TARGETS): %/.toolchain-built:
 	mkdir -p $*/toolchain
+	$(NDK)/build/tools/make-standalone-toolchain.sh \
+		--platform=android-14 \
+		--arch=$* --install-dir=$*/toolchain || \
 	$(NDK)/build/tools/make-standalone-toolchain.sh \
 		--platform=android-14 --system=linux-x86_64 \
 		--arch=$* --install-dir=$*/toolchain
