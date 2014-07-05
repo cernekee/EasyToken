@@ -1,0 +1,3 @@
+[submodule "external/stoken"]
+	path = external/stoken
+	url = git://github.com/cernekee/stoken.git

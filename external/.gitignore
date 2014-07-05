@@ -1,0 +1,8 @@
+dist/
+libxml2/
+
+arm/
+x86/
+mips/
+
+stoken-wrapper.jar
