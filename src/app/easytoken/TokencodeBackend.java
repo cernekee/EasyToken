@@ -156,7 +156,7 @@ public class TokencodeBackend extends BroadcastReceiver {
 
 		mListener.onTokencodeUpdate(mTokencode, mNextTokencode, interval - (second % interval));
 
-		if (reschedule) {
+		if (reschedule && mCallbackEnabled) {
 			mHandler.postDelayed(mRunnable, INTERVAL_MS);
 		}
 	}
