@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.easytoken"
-    android:versionCode="800"
+    android:versionCode="809"
     android:versionName="0.80" >
 
     <uses-sdk
