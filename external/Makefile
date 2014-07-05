@@ -90,9 +90,12 @@ $(ARCH_TOOLCHAIN_TARGETS): %/.toolchain-built:
 LIBXML2_TAR := $(DISTDIR)/libxml2-2.9.0.tar.gz
 LIBXML2_SHA1 := a43d7c0a8e463ac5a7846254f2a732a9af146fab
 
-libxml2/configure:
+$(LIBXML2_TAR):
 	mkdir -p $(DISTDIR)
 	$(FETCH) $(LIBXML2_TAR) $(LIBXML2_SHA1)
+
+libxml2/configure: $(LIBXML2_TAR)
+	mkdir -p $(DISTDIR)
 	mkdir libxml2
 	tar -C libxml2 --strip 1 -zxf $(LIBXML2_TAR)
 	touch $@
@@ -177,3 +180,10 @@ stoken-wrapper.jar:
 	mkdir -p $(LIBS)
 	cp stoken/java/dist/stoken-wrapper.jar $(LIBS)/
 	cp $(LIBS)/stoken-wrapper.jar .
+
+#####################################################################
+# Misc.
+#####################################################################
+
+sources: $(LIBXML2_TAR) $(TOMCRYPT_TAR)
+
