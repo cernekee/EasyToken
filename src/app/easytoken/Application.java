@@ -17,11 +17,22 @@
 
 package app.easytoken;
 
+import org.acra.ACRA;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
+
+@ReportsCrashes(formKey = "",
+				mailTo = "cernekee@gmail.com",
+				mode = ReportingInteractionMode.DIALOG,
+                resDialogText = R.string.crash_dialog_text,
+                resDialogCommentPrompt = R.string.crash_dialog_comment_prompt)
+
 public class Application extends android.app.Application {
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		ACRA.init(this);
 		System.loadLibrary("stoken");
 		TokenInfo.init(getApplicationContext());
 		TokencodeWidgetService.kick(getApplicationContext());

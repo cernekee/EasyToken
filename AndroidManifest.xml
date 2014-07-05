@@ -34,6 +34,12 @@
             android:name="de.blinkt.openvpn.FileSelect" >
         </activity>
 
+	    <activity android:name="org.acra.CrashReportDialog"
+	        android:theme="@android:style/Theme.Dialog"
+	        android:launchMode="singleInstance"
+	        android:excludeFromRecents="true"
+	        android:finishOnTaskLaunch="true" />
+
         <activity
             android:name=".ImportActivity"
             android:label="@string/import_token"

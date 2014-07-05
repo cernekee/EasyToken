@@ -120,4 +120,8 @@
     <string name="error_importing_file">Error importing File</string>
     <string name="import_error_message">Could not import File from filesystem</string>
 
+    <!-- ACRA crash reporting -->
+    <string name="crash_dialog_text">An unexpected error occurred forcing the application to stop. Please help us fix this by sending us error data.</string>
+    <string name="crash_dialog_comment_prompt">Please describe what was happening when the problem occurred:</string>
+
 </resources>
