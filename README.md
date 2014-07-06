@@ -23,7 +23,7 @@ No registration is required to download from XDA.
 ## Support
 
 To report issues, please email the author at
-[cernekee@gmail.com](mailto:cernekee+et@gmail.com) or post in the
+[cernekee@gmail.com](mailto:cernekee@gmail.com) or post in the
 [XDA thread](http://forum.xda-developers.com/android/apps-games/app-easy-token-source-securid-token-t2805507).
 
 ## Screenshots
