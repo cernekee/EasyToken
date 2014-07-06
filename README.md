@@ -61,3 +61,17 @@ Then build the Java components:
     ant debug
 
 Build logs can be found on this project's [Travis CI page](https://travis-ci.org/cernekee/EasyToken).
+
+## Security considerations
+
+Please use Easy Token responsibly and avoid taking unnecessary risks with
+sensitive data.  All software tokens are at risk of theft by malware; for
+high-security applications a hardware token is strongly preferred.
+
+Saving your PIN is convenient, but can be risky if your device is stolen.
+
+If you use the lock screen widget, your tokencode is available to anybody with
+access to your phone (even if they cannot unlock it).  For this case, you may
+want to ask your system administrator to issue a 6-digit PIN-less software
+token, which will require you to enter PIN + TOKENCODE when logging in, instead
+of just a tokencode.

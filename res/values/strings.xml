@@ -30,7 +30,7 @@
     <string name="help_text_080"> - Some Android versions miscalculate the widget\'s size, resulting in a distorted image.  If this happens, delete the widget and re-create it.</string>
     <string name="help_text_090"> - You may delete the clock widget from the lock screen and place Easy Token on the main lock screen, if desired.  Clicking on the Easy Token lock screen widget will toggle between tokencode mode and clock mode.</string>
     <string name="help_text_100">\nSecurity considerations:\n</string>
-    <string name="help_text_110">Please use Easy Token responsibly and avoid taking unnecessary risks with sensitive data.  All software tokens are at risk of theft by malware; for high-security applications a hardware token is strongly encouraged.\n</string>
+    <string name="help_text_110">Please use Easy Token responsibly and avoid taking unnecessary risks with sensitive data.  All software tokens are at risk of theft by malware; for high-security applications a hardware token is strongly preferred.\n</string>
     <string name="help_text_120">Saving your PIN is convenient, but can be risky if your device is stolen.\n</string>
     <string name="help_text_130">If you use the lock screen widget, your tokencode is available to anybody with access to your phone (even if they cannot unlock it).  For this case, you may want to ask your system administrator to issue a 6-digit PIN-less software token, which will require you to enter PIN + TOKENCODE when logging in, instead of just a tokencode.</string>
 
