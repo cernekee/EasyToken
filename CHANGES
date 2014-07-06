@@ -1,4 +1,4 @@
-v0.81 - UNRELEASED
+v0.81 - 2014/07/06
 
  - Fix bug in lock screen widget where it would "bounce" between the tokencode
    display and the clock display for no apparent reason
