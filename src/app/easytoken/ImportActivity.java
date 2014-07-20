@@ -65,12 +65,14 @@ public class ImportActivity extends Activity
 	private int mStep;
 	private String mInputMethod;
 	private String mUri;
+	private String mGuessedDevID;
 	private String mErrorType;
 	private String mErrorData;
 
 	private static final String STATE_STEP = PFX + "step";
 	private static final String STATE_INPUT_METHOD = PFX + "input_method";
 	private static final String STATE_URI = PFX + "uri";
+	private static final String STATE_GUESSED_DEV_ID = PFX + "guessed_dev_id";
 	private static final String STATE_ERROR_TYPE = PFX + "error_type";
 	private static final String STATE_ERROR_DATA = PFX + "error_data";
 
@@ -82,6 +84,7 @@ public class ImportActivity extends Activity
 			mStep = b.getInt(STATE_STEP);
 			mInputMethod = b.getString(STATE_INPUT_METHOD);
 			mUri = b.getString(STATE_URI);
+			mGuessedDevID = b.getString(STATE_GUESSED_DEV_ID);
 			mErrorType = b.getString(STATE_ERROR_TYPE);
 			mErrorData = b.getString(STATE_ERROR_DATA);
 		} else {
@@ -112,6 +115,7 @@ public class ImportActivity extends Activity
 		b.putInt(STATE_STEP, mStep);
 		b.putString(STATE_INPUT_METHOD, mInputMethod);
 		b.putString(STATE_URI, mUri);
+		b.putString(STATE_GUESSED_DEV_ID, mGuessedDevID);
 		b.putString(STATE_ERROR_TYPE, mErrorType);
 		b.putString(STATE_ERROR_DATA, mErrorData);
 	}
@@ -164,6 +168,53 @@ public class ImportActivity extends Activity
 		return lib;
 	}
 
+	private boolean guessDevID(LibStoken lib, String id) {
+		// This checks the devid hash, but on v2 tokens it is only 15 bits and is
+		// prone to collisions...
+		if (!lib.checkDevID(id)) {
+			return false;
+		}
+
+		// ...so, for passwordless v2 tokens, we can perform a test decrypt to
+		// rule out that possibility.
+		// Passworded v2 tokens are trickier because they could pass
+		// lib.checkDevId() with a hash collision, and we can't check the other
+		// hash until both the devid AND password are correct.
+		if (lib.isPassRequired() ||
+				lib.decryptSeed(null, id) == LibStoken.SUCCESS) {
+			mGuessedDevID = id;
+			return true;
+		}
+		return false;
+	}
+
+	private boolean manualDevID(LibStoken lib) {
+		if (!lib.isDevIDRequired()) {
+			// token doesn't require a device ID at all
+			return false;
+		}
+		if ("".equals(mGuessedDevID)) {
+			// already tried to guess, but failed
+			return true;
+		}
+
+		if (guessDevID(lib, TokenInfo.getDeviceId())) {
+			// guessed correctly (probably) - save it
+			return false;
+		}
+
+		for (LibStoken.StokenGUID g : lib.getGUIDList()) {
+			// Try known class GUIDs for Android, iPhone, Blackberry, ...
+			if (guessDevID(lib, g.GUID)) {
+				return false;
+			}
+		}
+
+		// no luck, revert back to manual entry
+		mGuessedDevID = "";
+		return true;
+	}
+
 	private void writeNewToken(LibStoken lib) {
 		TokenInfo info;
 
@@ -204,10 +255,10 @@ public class ImportActivity extends Activity
 				/* mStep has already been advanced to an error state */
 				return;
 			}
-			if (lib.isDevIDRequired() || lib.isPassRequired()) {
+			if (manualDevID(lib) || lib.isPassRequired()) {
 				mStep = STEP_UNLOCK_TOKEN;
 			} else {
-				if (lib.decryptSeed(null, null) != LibStoken.SUCCESS) {
+				if (lib.decryptSeed(null, mGuessedDevID) != LibStoken.SUCCESS) {
 					showError(ImportInstructionsFragment.INST_BAD_TOKEN, mUri);
 					return;
 				}
@@ -231,7 +282,7 @@ public class ImportActivity extends Activity
 				return;
 			}
 			Bundle b = new Bundle();
-			b.putString(ImportUnlockFragment.ARG_DEFAULT_DEVID, TokenInfo.getDeviceId());
+			b.putString(ImportUnlockFragment.ARG_DEFAULT_DEVID, mGuessedDevID);
 			b.putBoolean(ImportUnlockFragment.ARG_REQUEST_PASS, lib.isPassRequired());
 			b.putBoolean(ImportUnlockFragment.ARG_REQUEST_DEVID, lib.isDevIDRequired());
 
@@ -352,12 +403,10 @@ public class ImportActivity extends Activity
 		if (lib.decryptSeed(pass, devid) != LibStoken.SUCCESS) {
 			int resId = R.string.general_failure;
 
-			if (lib.isPassRequired() && lib.isDevIDRequired()) {
-				resId = R.string.pass_devid_bad;
-			} else if (lib.isPassRequired() && !lib.isDevIDRequired()) {
-				resId = R.string.pass_bad;
-			} else if (!lib.isPassRequired() && lib.isDevIDRequired()) {
+			if (lib.isDevIDRequired() && !lib.checkDevID(devid)) {
 				resId = R.string.devid_bad;
+			} else if (lib.isPassRequired()) {
+				resId = R.string.pass_bad;
 			}
 			mDialog = errorDialog(R.string.unable_to_process_token, resId);
 			lib.destroy();
