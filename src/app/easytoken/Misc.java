@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Scanner;
 
 import android.content.Context;
 import android.net.Uri;
@@ -65,12 +64,16 @@ public class Misc {
 	public static String readStringFromUri(Context context, Uri uri) {
 		try {
 			InputStream fs = context.getContentResolver().openInputStream(uri);
-			Scanner s = new Scanner(fs);
-			s.useDelimiter("\\A");
-			String str = s.hasNext() ? s.next() : "";
-			s.close();
-			fs.close();
-			return str;
+			byte buffer[] = new byte[BUFLEN];
+
+			try {
+				int len = fs.read(buffer);
+				byte newbuf[] = new byte[len];
+				System.arraycopy(buffer, 0, newbuf, 0, len);
+				return new String(newbuf);
+			} finally {
+				fs.close();
+			}
 		} catch (Exception e) {
 			Log.e(TAG, "error reading from content provider", e);
 		}
