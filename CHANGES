@@ -1,3 +1,12 @@
+v0.90 - 2014/07/26
+
+ - Rework handling of bound device IDs during token import.  Try to guess
+   it based on the current (unique) device ID and all known class GUIDs.
+   Allow the user to override it, in case of a collision.
+
+ - Limit import string to 64kB to avoid OutOfMemoryError crashes on invalid
+   tokens.
+
 v0.81 - 2014/07/06
 
  - Fix bug in lock screen widget where it would "bounce" between the tokencode
