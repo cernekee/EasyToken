@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 
-NDK := /opt/android-ndk-r9d
+NDK := /opt/android-ndk-r10
 
 TOPDIR := $(shell pwd)
 LIBS := $(TOPDIR)/../libs
@@ -75,10 +75,10 @@ distclean: clean
 
 $(ARCH_TOOLCHAIN_TARGETS): %/.toolchain-built:
 	mkdir -p $*/toolchain
-	$(NDK)/build/tools/make-standalone-toolchain.sh \
+	bash $(NDK)/build/tools/make-standalone-toolchain.sh \
 		--platform=android-14 \
 		--arch=$* --install-dir=$*/toolchain || \
-	$(NDK)/build/tools/make-standalone-toolchain.sh \
+	bash $(NDK)/build/tools/make-standalone-toolchain.sh \
 		--platform=android-14 --system=linux-x86_64 \
 		--arch=$* --install-dir=$*/toolchain
 	touch $@
