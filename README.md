@@ -38,7 +38,7 @@ To report issues, please email the author at
 
 On the host side you'll need to install:
 
-* NDK r9d, nominally under /opt/android-ndk-r9d
+* NDK r10, nominally under /opt/android-ndk-r10
 * Host-side gcc, make, etc. (Red Hat "Development Tools" group or Debian build-essential)
 * git, autoconf, automake, and libtool
 * Android SDK in your $PATH (both platform-tools/ and tools/ directories)
@@ -53,7 +53,7 @@ First, clone the source trees:
 
 Then build the binary components (libs/ directory):
 
-    make -C external NDK=/opt/android-ndk-r9d
+    make -C external NDK=/opt/android-ndk-r10
 
 Then build the Java components:
 
