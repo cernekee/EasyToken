@@ -96,8 +96,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data
                     android:scheme="content"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.sdtid" />
+                    android:mimeType="application/*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:scheme="content"
+                    android:mimeType="text/*" />
             </intent-filter>
 
         </activity>
