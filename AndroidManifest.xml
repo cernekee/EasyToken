@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.easytoken"
-    android:versionCode="909"
-    android:versionName="0.90" >
+    android:versionCode="911"
+    android:versionName="0.91-beta1" >
 
     <uses-sdk
         android:minSdkVersion="16"

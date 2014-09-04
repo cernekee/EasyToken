@@ -1,3 +1,8 @@
+v0.91 - UNRELEASED
+
+ - Use more specific MIME type matches so that Easy Token associations don't
+   show up in Contacts.
+
 v0.90 - 2014/07/26
 
  - Rework handling of bound device IDs during token import.  Try to guess
