@@ -48,10 +48,8 @@ FETCH := $(TOPDIR)/fetch.sh
 
 ARCH_TOOLCHAIN_TARGETS := $(addsuffix /.toolchain-built,$(ARCH_LIST))
 ARCH_LIBXML2_TARGETS := $(addsuffix /$(SYSROOT)/lib/libxml2.la,$(ARCH_LIST))
-
-ARCH_TOMCRYPT_SRC := $(addsuffix /libtomcrypt/makefile,$(ARCH_LIST))
-ARCH_TOMCRYPT_TARGETS := $(addsuffix /$(SYSROOT)/lib/libtomcrypt.a,$(ARCH_LIST))
-
+ARCH_GMP_TARGETS := $(addsuffix /$(SYSROOT)/lib/libgmp.la,$(ARCH_LIST))
+ARCH_NETTLE_TARGETS := $(addsuffix /$(SYSROOT)/lib/libnettle.a,$(ARCH_LIST))
 ARCH_STOKEN_TARGETS := $(addsuffix /libstoken.so,$(ARCH_LIST))
 
 .PHONY: all clean distclean
@@ -63,7 +61,7 @@ clean:
 	cd stoken/java && ant clean
 
 distclean: clean
-	rm -rf dist libxml2
+	rm -rf dist nettle gmp libxml2
 
 #####################################################################
 # Toolchain
@@ -100,8 +98,8 @@ libxml2/configure: $(LIBXML2_TAR)
 	tar -C libxml2 --strip 1 -zxf $(LIBXML2_TAR)
 	touch $@
 
-$(ARCH_LIBXML2_TARGETS): %/$(SYSROOT)/lib/libxml2.la: %/.toolchain-built \
-		libxml2/configure
+$(ARCH_LIBXML2_TARGETS): %/$(SYSROOT)/lib/libxml2.la: \
+		%/.toolchain-built libxml2/configure
 	rm -rf $*/libxml2
 	mkdir $*/libxml2
 	cd $*/libxml2 && $(call set_vars,$*) $(TOPDIR)/libxml2/configure \
@@ -122,34 +120,61 @@ $(ARCH_LIBXML2_TARGETS): %/$(SYSROOT)/lib/libxml2.la: %/.toolchain-built \
 	$(call do_make,$*) -C $*/libxml2 install-data
 
 #####################################################################
-# libtomcrypt (in-tree build)
+# libgmp (out of tree build)
 #####################################################################
 
-TOMCRYPT_TAR := $(DISTDIR)/crypt-1.17.tar.bz2
-TOMCRYPT_SHA1 := 9c746822c84e4276e432b64964f94d1d5ddd13ad
+GMP_TAR := $(DISTDIR)/gmp-5.1.3.tar.bz2
+GMP_SHA1 := b35928e2927b272711fdfbf71b7cfd5f86a6b165
 
-$(TOMCRYPT_TAR):
+$(GMP_TAR):
 	mkdir -p $(DISTDIR)
-	$(FETCH) $(TOMCRYPT_TAR) $(TOMCRYPT_SHA1)
+	$(FETCH) $(GMP_TAR) $(GMP_SHA1)
 
-$(ARCH_TOMCRYPT_SRC): %/libtomcrypt/makefile: $(TOMCRYPT_TAR)
-	rm -rf $*/libtomcrypt
-	mkdir $*/libtomcrypt
-	tar -C $*/libtomcrypt --strip 1 -jxf $(TOMCRYPT_TAR)
+gmp/configure: $(GMP_TAR)
+	mkdir -p $(DISTDIR)
+	mkdir gmp
+	tar -C gmp --strip 1 -jxf $(GMP_TAR)
 	touch $@
 
-$(ARCH_TOMCRYPT_TARGETS): %/$(SYSROOT)/lib/libtomcrypt.a: \
-		%/.toolchain-built %/libtomcrypt/makefile
-	$(call do_make,$*) -C $*/libtomcrypt \
-		CC="$(TRIPLET_$*)-gcc" \
-		AR="$(TRIPLET_$*)-ar" \
-		RANLIB="$(TRIPLET_$*)-ranlib"
-	$(call do_make,$*) -C $*/libtomcrypt \
-		DESTDIR=$(TOPDIR)/$*/$(SYSROOT) \
-		LIBPATH=/lib INCPATH=/include \
-		INSTALL_USER=$(shell id -u) \
-		INSTALL_GROUP=$(shell id -g) \
-		NODOCS=1 install
+$(ARCH_GMP_TARGETS): %/$(SYSROOT)/lib/libgmp.la: \
+		%/.toolchain-built gmp/configure
+	rm -rf $*/gmp
+	mkdir $*/gmp
+	cd $*/gmp && $(call set_vars,$*) $(TOPDIR)/gmp/configure \
+		--prefix=$(TOPDIR)/$*/$(SYSROOT) --host=$(TRIPLET_$*) \
+		--disable-assembly \
+		--disable-shared --enable-static
+	$(call do_make,$*) -C $*/gmp
+	$(call do_make,$*) -C $*/gmp install
+
+#####################################################################
+# nettle (out of tree build)
+#####################################################################
+
+NETTLE_TAR := $(DISTDIR)/nettle-2.7.1.tar.gz
+NETTLE_SHA1 := e7477df5f66e650c4c4738ec8e01c2efdb5d1211
+
+$(NETTLE_TAR):
+	mkdir -p $(DISTDIR)
+	$(FETCH) $(NETTLE_TAR) $(NETTLE_SHA1)
+
+nettle/configure: $(NETTLE_TAR)
+	mkdir -p $(DISTDIR)
+	mkdir nettle
+	tar -C nettle --strip 1 -zxf $(NETTLE_TAR)
+	touch $@
+
+$(ARCH_NETTLE_TARGETS): %/$(SYSROOT)/lib/libnettle.a: \
+		%/.toolchain-built nettle/configure \
+		%/$(SYSROOT)/lib/libgmp.la
+	rm -rf $*/nettle
+	mkdir $*/nettle
+	cd $*/nettle && $(call set_vars,$*) $(TOPDIR)/nettle/configure \
+		--prefix=$(TOPDIR)/$*/$(SYSROOT) --host=$(TRIPLET_$*) \
+		--disable-assembler \
+		--disable-shared --enable-static
+	$(call do_make,$*) -C $*/nettle SUBDIRS=
+	$(call do_make,$*) -C $*/nettle SUBDIRS= install
 
 #####################################################################
 # stoken (out of tree build)
@@ -158,8 +183,9 @@ $(ARCH_TOMCRYPT_TARGETS): %/$(SYSROOT)/lib/libtomcrypt.a: \
 stoken/configure:
 	cd stoken && bash autogen.sh
 
-$(ARCH_STOKEN_TARGETS): %/libstoken.so: %/.toolchain-built stoken/configure \
-		%/$(SYSROOT)/lib/libtomcrypt.a %/$(SYSROOT)/lib/libxml2.la
+$(ARCH_STOKEN_TARGETS): %/libstoken.so: \
+		%/.toolchain-built stoken/configure \
+		%/$(SYSROOT)/lib/libnettle.a %/$(SYSROOT)/lib/libxml2.la
 	rm -rf $*/stoken
 	mkdir $*/stoken
 	cd $*/stoken && $(call set_vars,$*) $(TOPDIR)/stoken/configure \
@@ -185,5 +211,5 @@ stoken-wrapper.jar:
 # Misc.
 #####################################################################
 
-sources: $(LIBXML2_TAR) $(TOMCRYPT_TAR)
+sources: $(LIBXML2_TAR) $(GMP_TAR) $(NETTLE_TAR)
 

@@ -1,5 +1,7 @@
 dist/
 libxml2/
+gmp/
+nettle/
 
 arm/
 x86/

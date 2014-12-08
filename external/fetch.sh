@@ -21,9 +21,15 @@ libxml2_MIRROR_0=ftp://xmlsoft.org/libxml2
 libxml2_MIRROR_1=ftp://gd.tuwien.ac.at/pub/libxml
 libxml2_MIRROR_2=http://distfiles.macports.org/libxml2
 
-crypt_MIRROR_0=http://libtom.org/files
-crypt_MIRROR_1=ftp://ftp.allbsd.org/pub/FreeBSD/ports/distfiles
-crypt_MIRROR_2=ftp://ftp.mirrorservice.org/sites/ftp.netbsd.org/pub/pkgsrc/distfiles
+gmp_MIRROR_0=http://ftp.gnu.org/gnu/gmp
+gmp_MIRROR_1=ftp://ftp.gmplib.org/pub/gmp
+gmp_MIRROR_2=http://mirror.anl.gov/pub/gnu/gmp
+gmp_MIRROR_3=http://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gmp
+
+nettle_MIRROR_0=http://www.lysator.liu.se/~nisse/archive
+nettle_MIRROR_1=http://mirror.anl.gov/pub/gnu/nettle
+nettle_MIRROR_2=http://ftp.gnu.org/gnu/nettle
+nettle_MIRROR_3=http://gd.tuwien.ac.at/gnu/gnusrc/nettle
 
 MAX_TRIES=5
 
