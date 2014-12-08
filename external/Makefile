@@ -85,8 +85,8 @@ $(ARCH_TOOLCHAIN_TARGETS): %/.toolchain-built:
 # libxml2 (out of tree build)
 #####################################################################
 
-LIBXML2_TAR := $(DISTDIR)/libxml2-2.9.0.tar.gz
-LIBXML2_SHA1 := a43d7c0a8e463ac5a7846254f2a732a9af146fab
+LIBXML2_TAR := $(DISTDIR)/libxml2-2.9.2.tar.gz
+LIBXML2_SHA1 := f46a37ea6d869f702e03f393c376760f3cbee673
 
 $(LIBXML2_TAR):
 	mkdir -p $(DISTDIR)
