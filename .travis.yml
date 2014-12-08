@@ -13,10 +13,11 @@ before_install:
     - export COMPONENTS=build-tools-19.1.0,android-19,extra-android-support
     - curl -L https://raw.github.com/embarkmobile/android-sdk-installer/master/android-sdk-installer | bash /dev/stdin --install=$COMPONENTS
     - source ~/.android-sdk-installer/env
-    - curl -L http://dl.google.com/android/ndk/android-ndk32-r10-linux-x86_64.tar.bz2 > ndk.tar.bz2
-    - sudo tar -C /opt -jxf ndk.tar.bz2
+    - curl -L http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86_64.bin > ndk.bin
+    - chmod 0755 ndk.bin
+    - sudo ./ndk.bin -o/opt > /dev/null
     - android update project -p . -s
 
 script:
-    - make -C external NDK=/opt/android-ndk-r10
+    - make -C external NDK=/opt/android-ndk-r10d
     - ant debug

@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 
-NDK := /opt/android-ndk-r10
+NDK := /opt/android-ndk-r10d
 
 TOPDIR := $(shell pwd)
 LIBS := $(TOPDIR)/../libs
