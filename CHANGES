@@ -1,7 +1,11 @@
-v0.91 - UNRELEASED
+v0.91 - 2014/12/20
 
  - Use more specific MIME type matches so that Easy Token associations don't
    show up in Contacts.
+
+ - Update libstoken to v0.81 and switch from tomcrypt to nettle.  Most of
+   the changes in v0.8/v0.81 won't matter on Android, but it is now possible
+   to import hard token seed files if desired.
 
 v0.90 - 2014/07/26
 
