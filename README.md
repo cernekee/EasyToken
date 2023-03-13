@@ -1,6 +1,10 @@
 Easy Token
 ==========
 
+*This project is not under active development.* There is a forked version
+at <https://github.com/sraase/EasyToken> which has a number of updates
+to the build system and the dependencies.
+
 Easy Token is an RSA SecurID-compatible software authenticator for Android
 with advanced usability features:
 
